@@ -14,6 +14,7 @@ NotifierProvider<QuotationViewModel, List<QuotationItem>>(
 class QuotationViewModel extends Notifier<List<QuotationItem>> {
   late final FirestoreService _firestoreService;
   late final PdfService _pdfService;
+  String? _currentQuotationId;
 
   @override
   List<QuotationItem> build() {
@@ -37,9 +38,14 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
 
   Future<void> submitQuotation({bool clearAfter = false}) async {
     if (state.isEmpty) return;
-    await _firestoreService.saveQuotation(state, grandTotal);
+    _currentQuotationId = await _firestoreService.saveQuotation(
+      state,
+      grandTotal,
+      id: _currentQuotationId,
+    );
     if (clearAfter) {
       state = [];
+      _currentQuotationId = null;
     }
   }
 

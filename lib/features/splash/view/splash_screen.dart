@@ -48,25 +48,12 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.panel,
-                ),
-                child: Icon(
-                  Icons.receipt_long,
-                  size: 48,
-                  color: AppColors.textSecondary,
-                ),
-              ),
              AppSpacing.h24,
               Text(
                 'Quote Maker',
-                style: AppTypography.h5,
+                style: AppTypography.h2,
               ),
-              AppSpacing.h8,
+              AppSpacing.h10,
               Text(
                 'Create professional quotations in seconds',
                 style: AppTypography.body2.copyWith(

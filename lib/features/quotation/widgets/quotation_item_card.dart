@@ -36,6 +36,7 @@ class QuotationItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          AppSpacing.h2,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,18 +53,15 @@ class QuotationItemCard extends StatelessWidget {
                     AppSpacing.h4,
                     Text(
                       item.brand,
-                      style:AppTypography.caption.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary
-                      )
+                      style:AppTypography.body2
                     ),
-                    if (item.watt > 0) ...[
-                      AppSpacing.h2,
-                      Text(
-                        '${item.watt}W',
-                        style:AppTypography.caption,
-                      ),
-                    ],
+                    // if (item.watt > 0) ...[
+                    //   AppSpacing.h2,
+                    //   Text(
+                    //     '${item.watt}W',
+                    //     style:AppTypography.caption,
+                    //   ),
+                    // ],
                   ],
                 ),
               ),
@@ -72,7 +70,7 @@ class QuotationItemCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${item.qty} NOS (${(item.qty * item.watt).toStringAsFixed(0)} W)',
+                    '${item.qty} NOS',
                     style:AppTypography.body2.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -80,20 +78,17 @@ class QuotationItemCard extends StatelessWidget {
                   AppSpacing.h2,
                   Text(
                     '${item.warranty} YEARS',
-                      style:AppTypography.caption.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary
-                      )
+                      style:AppTypography.body2
                   ),
                 ],
               ),
             ],
           ),
-          AppSpacing.h2,
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                ' ${item.total.toStringAsFixed(2)}',
+                ' ${item.rating}',
                 style:AppTypography.body2.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryColor

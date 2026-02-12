@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/constants/app_assets.dart';
 import '../../../core/utils/theme/app_colors.dart';
+import '../../../core/utils/theme/app_typography.dart';
 import '../viewmodel/quotation_viewmodel.dart';
 import '../../../core/utils/constants/constants.dart';
 
@@ -49,32 +52,38 @@ class SummaryScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${item.material} - ${item.brand}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                item.material,
+                                  style: AppTypography.body1.copyWith(
+                                      fontWeight: FontWeight.w600
+                                  ),
                               ),
-                              const SizedBox(height: 2),
                               Text(
-                                'Qty: ${item.qty}  Rate: ₹${item.price.toStringAsFixed(2)}  Total: ₹${item.total.toStringAsFixed(2)}',
-                                style: const TextStyle(fontSize: 12),
+                                item.brand,
+                                  style: AppTypography.body2,
                               ),
-                              const Divider(),
+                              AppSpacing.h2,
+                              Text(
+                                'Qty: ${item.qty}  Rating: ${item.price.toStringAsFixed(2)}',
+                               style: AppTypography.caption.copyWith(
+                                 fontSize: 13.sp,fontWeight: FontWeight.w400
+                               ),
+                              ),
+                              const Divider(thickness: 0.7,),
                             ],
                           ),
                         );
                       },
                     ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Grand Total: ₹${total.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.right,
-            ),
+            // const SizedBox(height: 12),
+            // Text(
+            //   'Grand Total: ₹${total.toStringAsFixed(2)}',
+            //   style: const TextStyle(
+            //     fontSize: 16,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            //   textAlign: TextAlign.right,
+            // ),
             const SizedBox(height: 16),
             SafeArea(
               child: SizedBox(

@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -26,24 +27,29 @@ class PdfService {
               ),
               pw.SizedBox(height: 20),
               pw.Table.fromTextArray(
-                headers: ['Material', 'Brand', 'Qty', 'Rate', 'Total'],
+                headerStyle: pw.TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: pw.FontWeight.bold
+                ),
+                headers: ['Material', 'Brand', 'Qty', 'Rating', 'Warranty'],
+                cellStyle: pw.TextStyle(   fontWeight: pw.FontWeight.normal,fontSize: 15.sp),
                 data: items
                     .map(
                       (e) => [
                         e.material,
                         e.brand,
                         e.qty,
-                        e.price,
-                        e.total,
+                        e.rating,
+                        e.warranty,
                       ],
                     )
                     .toList(),
               ),
-              pw.Divider(),
-              pw.Align(
-                alignment: pw.Alignment.centerRight,
-                child: pw.Text('Grand Total: ₹$grandTotal'),
-              )
+              // pw.Divider(),
+              // pw.Align(
+              //   alignment: pw.Alignment.centerRight,
+              //   child: pw.Text('Grand Total: ₹$grandTotal'),
+              // )
             ],
           ),
         ),

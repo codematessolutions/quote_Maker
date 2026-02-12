@@ -7,13 +7,27 @@ import '../errors/app_exception.dart';
 class FirestoreService {
   final _db = FirebaseFirestore.instance;
 
-  Future<void> saveQuotation(List<QuotationItem> items, double total) async {
+  /// Creates a new quotation document when [id] is null, or updates
+  /// an existing one when [id] is provided. Returns the document id.
+  Future<String> saveQuotation(
+    List<QuotationItem> items,
+    double total, {
+    String? id,
+  }) async {
     try {
-      await _db.collection('quotations').add({
+      final data = <String, dynamic>{
         'createdAt': Timestamp.now(),
         'total': total,
         'items': items.map((e) => e.toJson()).toList(),
-      });
+      };
+
+      if (id == null) {
+        final doc = await _db.collection('quotations').add(data);
+        return doc.id;
+      } else {
+        await _db.collection('quotations').doc(id).set(data);
+        return id;
+      }
     } catch (e) {
       throw AppException.from(e);
     }

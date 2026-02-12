@@ -44,18 +44,18 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
             material: materialCtrl.text,
             brand: brandCtrl.text,
             qty: qty,
-            price: rate,
+            price: 0,
             warranty: warrantyYears,
-            rating: 0,
+            rating: rate,
             watt: 0,
           ),
         );
 
     materialCtrl.clear();
     brandCtrl.clear();
-    qtyCtrl.text = '1';
+    qtyCtrl.text = '0';
     priceCtrl.clear();
-    warrantyYears = 1;
+    warrantyYears = 0;
     ratingCtrl.clear();
     setState(() {});
   }
@@ -186,7 +186,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                         controller: ratingCtrl,
                         keyboardType: TextInputType.number,
                         decoration:  InputDecoration(
-                          labelText: 'Rate',
+                          labelText: 'Rating',
                           labelStyle: AppTypography.caption,
                           border: const OutlineInputBorder(),
                           isDense: true,
