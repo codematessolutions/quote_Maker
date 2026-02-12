@@ -81,7 +81,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(),
+                  builder: (_) => const BaymentProfileHeader(),
                 ),
               );
             },

@@ -1,196 +1,264 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quatation_making/core/utils/constants/app_spacing.dart';
+import 'package:quatation_making/core/utils/theme/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/utils/constants/app_assets.dart';
-import '../../../core/utils/constants/constants.dart';
-import '../../../core/utils/theme/app_colors.dart';
-import '../../../core/utils/theme/app_typography.dart';
-import '../../../core/errors/app_exception.dart';
-import '../viewmodel/profile_viewmodel.dart';
-
-class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+Future<void> _openUrl(String url) async {
+  final uri = Uri.parse(url);
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    throw Exception('Could not launch $url');
+  }
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _brandController = TextEditingController();
-  final _termsController = TextEditingController();
-  bool _initialized = false;
-  bool _isSaving = false;
-
-  @override
-  void dispose() {
-    _brandController.dispose();
-    _termsController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) {
-      return;
-    }
-    final vm = ref.read(profileViewModelProvider.notifier);
-    setState(() {
-      _isSaving = true;
-    });
-    try {
-      await vm.saveProfile(
-        brandName: _brandController.text.trim(),
-        termsAndConditions: _termsController.text.trim(),
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved successfully')),
-      );
-    } on AppException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save profile. Please try again.'),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    }
-  }
+class BaymentProfileHeader extends StatelessWidget {
+  const BaymentProfileHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final profileAsync = ref.watch(profileViewModelProvider);
-
-    profileAsync.whenData((profile) {
-      if (!_initialized && profile != null) {
-        _brandController.text = profile.brandName;
-        _termsController.text = profile.termsAndConditions;
-        _initialized = true;
-      }
-    });
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon:Image.asset(AppAssets.circleArrowLeft,scale: 4,),
-          onPressed: () => Navigator.of(context).pop(),
+        title: const Text(
+          'Profile',
+          style: TextStyle(color: AppColors.textPrimary),
         ),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const BaymentProfileHeader(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.screenPadding,
-          vertical: AppDimens.screenPadding * 2,
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-            Text(
-              'Profile',
-              style: AppTypography.h5,
-            ),
-            const SizedBox(height: 24),
-            CircleAvatar(
-              radius: 48,
-              backgroundColor: AppColors.panel,
-              child: Icon(
-                Icons.person,
-                size: 48,
-                color: AppColors.textSecondary,
+      backgroundColor: AppColors.background,
+      body: Padding(
+        padding: const EdgeInsets.all(17),
+        child: Column(
+          children: [
+            AppSpacing.h20,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.18),
+                ),
+
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Brand name',
-              style: AppTypography.body1.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: _isSaving ? null : _save,
-              child: _isSaving
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2,color: AppColors.primary,),
-                    )
-                  : Text(
-                      'Edit',
-                      style: AppTypography.body2.copyWith(
-                        fontWeight: FontWeight.w600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // LOGO CIRCLE
+                  Container(
+                    height: 64,
+                    width: 64,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF4F8BFF), Color(0xFF35C9FF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
                     ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _brandController,
-              decoration: InputDecoration(
-                labelText: 'Brand name',
-                labelStyle: AppTypography.caption,
-                border: const OutlineInputBorder(),
-                isDense: true,
+                    child: const Center(
+                      child: Icon(
+                        Icons.solar_power_rounded,
+                        color: Colors.black,
+                        size: 34,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // COMPANY NAME
+                  Text(
+                    'BAYMENT SOLAR',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme. titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // LOCATIONS
+                  Text(
+                    'ERNAKULAM · PATTAMBI · VALANCHERY · KANNUR',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      letterSpacing: 1.3,
+                      fontSize: 12,
+                      color: Colors.black.withOpacity(0.72),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                   Divider(color: AppColors.secondaryButton, height: 1),
+                  const SizedBox(height: 16),
+
+                  // CONTACT ROWS
+                  _ContactRow(
+                    icon: Icons.phone_rounded,
+                    label: 'Phone',
+                    value: '86066 93000  ·  86066 98000',
+                    onTap: () => _openUrl('tel:+918606693000'),
+                  ),
+                  const SizedBox(height: 12),
+                  _ContactRow(
+                    icon: Icons.email_outlined,
+                    label: 'Email',
+                    value: 'contact@baymentsolar.com',
+                    onTap: () => _openUrl('mailto:contact@baymentsolar.com'),
+                  ),
+                  const SizedBox(height: 12),
+                  _ContactRow(
+                    icon: Icons.language_rounded,
+                    label: 'Website',
+                    value: 'www.baymentsolar.com',
+                    onTap: () => _openUrl('https://www.baymentsolar.com'),
+                  ),
+
+                  const SizedBox(height: 18),
+                  const Divider(color: AppColors.secondaryButton, height: 1),
+                  const SizedBox(height: 14),
+
+                  // SOCIAL CHIPS
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _SocialChip(
+                        icon: Icons.facebook,
+                        label: '@Bayment solar',
+                        onTap: () => _openUrl(
+                          'https://www.facebook.com/BaymentSolar',
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      _SocialChip(
+                        icon: Icons.camera_alt_outlined,
+                        label: '@baymentsolar_',
+                        onTap: () => _openUrl(
+                          'https://www.instagram.com/baymentsolar_/',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Brand name is required';
-                }
-                if (value.trim().length > 50) {
-                  return 'Brand name too long';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 32),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Terms & Conditions',
-                style: AppTypography.body1.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _termsController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                alignLabelWithHint: true,
-                labelText: 'Enter terms & conditions',
-                labelStyle: AppTypography.caption,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Terms & conditions are required';
-                }
-                if (value.trim().length > 1000) {
-                  return 'Please keep this under 1000 characters';
-                }
-                return null;
-              },
             ),
           ],
-          ),
         ),
       ),
     );
   }
 }
 
+class _ContactRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  const _ContactRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            height: 38,
+            width: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withOpacity(0.10),
+            ),
+            child: Icon(icon, size: 20, color: Colors.black),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.black.withOpacity(0.6),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.black54, size: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class _SocialChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SocialChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.10),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.black, size: 18),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.black,fontSize: 11
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
