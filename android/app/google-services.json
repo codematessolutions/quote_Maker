@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1086426882643",
+    "firebase_url": "https://paytick-94de3-default-rtdb.firebaseio.com",
+    "project_id": "paytick-94de3",
+    "storage_bucket": "paytick-94de3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086426882643:android:b7a1492a864c8507be9ca6",
+        "android_client_info": {
+          "package_name": "com.example.paytick"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_fC2EqeLCjiY569zCesoMD_4ds60oeTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086426882643:android:c3cc482e086a2508be9ca6",
+        "android_client_info": {
+          "package_name": "com.quote.maker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_fC2EqeLCjiY569zCesoMD_4ds60oeTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
