@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/constants/app_assets.dart';
 import '../../../core/utils/theme/app_colors.dart';
 import '../viewmodel/quotation_viewmodel.dart';
@@ -90,7 +91,21 @@ class SummaryScreen extends ConsumerWidget {
                   onPressed: items.isEmpty
                       ? null
                       : () async {
-                          await vm.downloadPdf();
+                          try {
+                            await vm.downloadPdf();
+                          } on AppException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.message)),
+                            );
+                          } catch (_) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Unable to generate PDF. Please try again.',
+                                ),
+                              ),
+                            );
+                          }
                         },
                   child: const Text(
                     'Download PDF',

@@ -21,37 +21,32 @@ class QuotationScreen extends ConsumerStatefulWidget {
 }
 
 class _QuotationScreenState extends ConsumerState<QuotationScreen> {
+  final _formKey = GlobalKey<FormState>();
   final materialCtrl = TextEditingController();
   final brandCtrl = TextEditingController();
-  final qtyCtrl = TextEditingController(text: '1');
+  final qtyCtrl = TextEditingController(text: '');
   final priceCtrl = TextEditingController();
   final ratingCtrl = TextEditingController();
-  int warrantyYears = 1;
+  int warrantyYears = 0;
   bool _isSubmitting = false;
 
   void addItem() {
-    if (materialCtrl.text.isEmpty ||
-        brandCtrl.text.isEmpty ||
-        qtyCtrl.text.isEmpty ||
-        ratingCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) {
       return;
     }
 
     final qty = int.tryParse(qtyCtrl.text.trim()) ?? 1;
-    final price = double.tryParse(priceCtrl.text.trim()) ?? 0;
-    final rating = int.tryParse(ratingCtrl.text.trim()) ?? 0;
+    final rate = double.tryParse(ratingCtrl.text.trim()) ?? 0;
 
     ref.read(quotationViewModelProvider.notifier).addItem(
           QuotationItem(
             material: materialCtrl.text,
             brand: brandCtrl.text,
             qty: qty,
-            price: price,
+            price: rate,
             warranty: warrantyYears,
-            rating: rating,
+            rating: 0,
             watt: 0,
           ),
         );
@@ -131,18 +126,29 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
           SafeArea(
             top: false,
             bottom: true,
-            child: Container(
-                color: AppColors.panel,
-                padding: const EdgeInsets.all(AppDimens.screenPadding),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+            child: Form(
+              key: _formKey,
+              child: Container(
+                  color: AppColors.panel,
+                  padding: const EdgeInsets.all(AppDimens.screenPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                 Row(
                   children: [
                     Expanded(
                       child: _DropdownLikeField(
                         label: 'Materials',
                         controller: materialCtrl,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          if (value.trim().length > 50) {
+                            return 'Too long';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -150,6 +156,15 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                       child: _DropdownLikeField(
                         label: 'Brand',
                         controller: brandCtrl,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          if (value.trim().length > 50) {
+                            return 'Too long';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -162,33 +177,53 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                       child: _WarrantyStepper(
                         years: warrantyYears,
                         onChanged: (v) =>
-                            setState(() => warrantyYears = v.clamp(1, 99)),
+                            setState(() => warrantyYears = v.clamp(0, 99)),
                       ),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: TextField(
+                      child: TextFormField(
                         controller: ratingCtrl,
                         keyboardType: TextInputType.number,
                         decoration:  InputDecoration(
                           labelText: 'Rate',
                           labelStyle: AppTypography.caption,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          final rate = double.tryParse(value.trim());
+                          if (rate == null || rate <= 0) {
+                            return 'Enter valid amount';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: TextField(
+                      child: TextFormField(
                         controller: qtyCtrl,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Qty',
                           labelStyle: AppTypography.caption,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          final qty = int.tryParse(value.trim());
+                          if (qty == null || qty <= 0) {
+                            return 'Enter valid qty';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -289,8 +324,9 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                   ],
                 ),
               ],
+                  ),
                 ),
-              ),
+            ),
             ),
 
         ],
@@ -302,22 +338,28 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 class _DropdownLikeField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   const _DropdownLikeField({
     required this.label,
     required this.controller,
+    this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: AppTypography.caption,
         border: const OutlineInputBorder(),
         isDense: true,
-        suffixIcon: Image.asset(AppAssets.circleArrowBottom,scale: 4.5,),
+        suffixIcon: Image.asset(
+          AppAssets.circleArrowBottom,
+          scale: 4.5,
+        ),
       ),
     );
   }
@@ -349,12 +391,12 @@ class _WarrantyStepper extends StatelessWidget {
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints:BoxConstraints( maxWidth: 20.w),
-                onPressed: years > 1 ? () => onChanged(years - 1) : null,
+                onPressed: years > 0 ? () => onChanged(years - 1) : null,
                 icon:Image.asset(AppAssets.circleArrowLeft,scale: 4.5,)
               ),
               Text('$years',
                 textAlign: TextAlign.center,
-                style: AppTypography.body2,),
+                style: AppTypography.body1.copyWith(fontWeight: FontWeight.w600),),
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints:  BoxConstraints(

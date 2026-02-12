@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/services/firestore_service.dart';
 import '../../../data/models/profile.dart';
 
@@ -33,8 +34,9 @@ class ProfileViewModel extends AsyncNotifier<Profile?> {
       await _firestoreService.saveProfile(profile);
       state = AsyncData(profile);
     } catch (e, st) {
-      state = AsyncError(e, st);
-      rethrow;
+      final appException = AppException.from(e);
+      state = AsyncError(appException, st);
+      throw appException;
     }
   }
 }

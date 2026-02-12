@@ -5,6 +5,7 @@ import '../../../core/utils/constants/app_assets.dart';
 import '../../../core/utils/constants/constants.dart';
 import '../../../core/utils/theme/app_colors.dart';
 import '../../../core/utils/theme/app_typography.dart';
+import '../../../core/errors/app_exception.dart';
 import '../viewmodel/profile_viewmodel.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -15,6 +16,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _brandController = TextEditingController();
   final _termsController = TextEditingController();
   bool _initialized = false;
@@ -28,6 +30,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _save() async {
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) {
+      return;
+    }
     final vm = ref.read(profileViewModelProvider.notifier);
     setState(() {
       _isSaving = true;
@@ -41,10 +47,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile saved successfully')),
       );
-    } catch (e) {
+    } on AppException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save profile: $e')),
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save profile. Please try again.'),
+        ),
       );
     } finally {
       if (mounted) {
@@ -82,9 +95,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           horizontal: AppDimens.screenPadding,
           vertical: AppDimens.screenPadding * 2,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
             Text(
               'Profile',
               style: AppTypography.h5,
@@ -123,7 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFormField(
               controller: _brandController,
               decoration: InputDecoration(
                 labelText: 'Brand name',
@@ -131,6 +146,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Brand name is required';
+                }
+                if (value.trim().length > 50) {
+                  return 'Brand name too long';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 32),
             Align(
@@ -143,7 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
+            TextFormField(
               controller: _termsController,
               maxLines: 5,
               decoration: InputDecoration(
@@ -152,8 +176,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 labelStyle: AppTypography.caption,
                 border: const OutlineInputBorder(),
               ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Terms & conditions are required';
+                }
+                if (value.trim().length > 1000) {
+                  return 'Please keep this under 1000 characters';
+                }
+                return null;
+              },
             ),
           ],
+          ),
         ),
       ),
     );
