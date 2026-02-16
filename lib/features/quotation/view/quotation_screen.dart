@@ -6,6 +6,8 @@ import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 import 'package:quatation_making/features/addMaterials/application/material_provider.dart';
 import 'package:quatation_making/features/addMaterials/data/model/material_model.dart';
 import 'package:quatation_making/features/drawer/view/end_drawer.dart';
+import 'package:quatation_making/features/quotation/application/summary_provider.dart';
+import 'package:quatation_making/features/quotation/view/payment_summary_screen.dart';
 import 'package:quatation_making/features/quotation/widgets/materials_bottomsheet.dart';
 import 'package:quatation_making/features/quotation/widgets/read_only_field.dart';
 import 'package:quatation_making/router/app_routes.dart';
@@ -281,6 +283,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                                         AppDimens.buttonRadius),
                                   ),
                                 ),
+                                // Update the submit button onPressed in your QuotationScreen
                                 onPressed: items.isEmpty || _isSubmitting
                                     ? null
                                     : () async {
@@ -288,29 +291,29 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                                     _isSubmitting = true;
                                   });
                                   try {
-                                    await vm.submitQuotation();
+                                    // await vm.submitQuotation();
+
+                                    // Calculate and set total amount
+                                    final totalAmount = vm.calculateTotalAmount();
+                                    ref.read(summaryProvider.notifier).setTotalAmount(totalAmount);
+
                                     if (!mounted) return;
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text(
-                                            'Quotation saved successfully'),
+                                        content: Text('Quotation saved successfully'),
                                       ),
                                     );
-                      
+
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                        const SummaryScreen(),
+                                        builder: (_) => const SummaryDetailsScreen(),
                                       ),
                                     );
                                   } catch (e) {
                                     if (!mounted) return;
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(
-                                            'Failed to save quotation: $e'),
+                                        content: Text('Failed to save quotation: $e'),
                                       ),
                                     );
                                   } finally {

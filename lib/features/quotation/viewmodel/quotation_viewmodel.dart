@@ -48,7 +48,13 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
       _currentQuotationId = null;
     }
   }
-
+  double calculateTotalAmount() {
+    double total = 0;
+    for (var item in state) {
+      total += item.price * item.qty;
+    }
+    return total;
+  }
   Future<void> downloadPdf() async {
     if (state.isEmpty) return;
     await _pdfService.generateQuotationPdf(state, grandTotal);
