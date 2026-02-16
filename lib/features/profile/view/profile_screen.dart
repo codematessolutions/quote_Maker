@@ -79,7 +79,7 @@ class BaymentProfileHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.h16,
 
                   // COMPANY NAME
                   Text(
@@ -91,7 +91,7 @@ class BaymentProfileHeader extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  AppSpacing.h6,
 
                   // LOCATIONS
                   Text(

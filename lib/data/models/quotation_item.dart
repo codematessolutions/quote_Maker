@@ -1,8 +1,8 @@
 class QuotationItem {
   final String material;
   final String brand;
-  final int warranty;
-  final double rating;
+  final String warranty;
+  final String rating;
   final int qty;
   final int watt;
   final double price;

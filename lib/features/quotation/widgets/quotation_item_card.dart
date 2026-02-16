@@ -77,7 +77,7 @@ class QuotationItemCard extends StatelessWidget {
                   ),
                   AppSpacing.h2,
                   Text(
-                    '${item.warranty} YEARS',
+                    '${item.warranty} ',
                       style:AppTypography.body2
                   ),
                 ],
