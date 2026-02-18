@@ -3,22 +3,37 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/models/profile.dart';
 import '../../data/models/quotation_item.dart';
 import '../errors/app_exception.dart';
+import 'package:quatation_making/features/quotation/data/summary_model.dart';
 
 class FirestoreService {
   final _db = FirebaseFirestore.instance;
 
   /// Creates a new quotation document when [id] is null, or updates
   /// an existing one when [id] is provided. Returns the document id.
+  ///
+  /// Optionally accepts a [PaymentSummary] so that the values shown in the
+  /// payment summary screen are also stored along with the quotation.
   Future<String> saveQuotation(
     List<QuotationItem> items,
     double total, {
     String? id,
+    PaymentSummary? summary,
   }) async {
     try {
       final data = <String, dynamic>{
         'createdAt': Timestamp.now(),
         'total': total,
         'items': items.map((e) => e.toJson()).toList(),
+        if (summary != null)
+          'summary': {
+            'totalAmount': summary.totalAmount,
+            'subsidy': summary.subsidy,
+            'payableAfterSubsidy': summary.payableAfterSubsidy,
+            'specialOffer': summary.specialOffer,
+            'finalPayableAmount': summary.finalPayableAmount,
+            'advance': summary.advance,
+            'afterInstallation': summary.afterInstallation,
+          },
       };
 
       if (id == null) {

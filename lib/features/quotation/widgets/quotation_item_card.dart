@@ -20,8 +20,8 @@ class QuotationItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+      padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(AppDimens.cardRadius),
@@ -46,14 +46,14 @@ class QuotationItemCard extends StatelessWidget {
                   children: [
                     Text(
                       item.material,
-                      style: AppTypography.body1.copyWith(
+                      style: AppTypography.body2.copyWith(
                         fontWeight: FontWeight.w600
                       ),
                     ),
-                    AppSpacing.h4,
+                    AppSpacing.h2,
                     Text(
                       item.brand,
-                      style:AppTypography.body2
+                      style:AppTypography.caption
                     ),
                     // if (item.watt > 0) ...[
                     //   AppSpacing.h2,
@@ -78,7 +78,7 @@ class QuotationItemCard extends StatelessWidget {
                   AppSpacing.h2,
                   Text(
                     '${item.warranty} ',
-                      style:AppTypography.body2
+                      style:AppTypography.caption
                   ),
                 ],
               ),
@@ -86,19 +86,16 @@ class QuotationItemCard extends StatelessWidget {
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 ' ${item.rating}',
-                style:AppTypography.body2.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryColor
-                ),
+                style:AppTypography.caption
               ),
-              const Spacer(),
 
               IconButton(
                 padding: EdgeInsets.zero,
-                icon:Image.asset(AppAssets.delete,scale: 4.5,),
+                icon:Image.asset(AppAssets.delete,scale: 5,),
                 onPressed: onDelete,
               ),
             ],

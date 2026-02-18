@@ -9,6 +9,7 @@ import '../../../core/utils/theme/app_colors.dart';
 import '../../../core/utils/theme/app_typography.dart';
 import '../viewmodel/quotation_viewmodel.dart';
 import '../../../core/utils/constants/constants.dart';
+import '../application/summary_provider.dart';
 
 class SummaryScreen extends ConsumerWidget {
   const SummaryScreen({super.key});
@@ -17,7 +18,7 @@ class SummaryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(quotationViewModelProvider);
     final vm = ref.read(quotationViewModelProvider.notifier);
-    final total = vm.grandTotal;
+    final summary = ref.watch(summaryProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -101,7 +102,7 @@ class SummaryScreen extends ConsumerWidget {
                       ? null
                       : () async {
                           try {
-                            await vm.downloadPdf();
+                            await vm.downloadPdf(summary: summary);
                           } on AppException catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(e.message)),

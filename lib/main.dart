@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quatation_making/router/app_routes.dart';
 
 import 'features/splash/view/splash_screen.dart';
 
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(375, 812),
       child: MaterialApp(
         title: 'Quote Maker',
+        scaffoldMessengerKey: NavigationService.scaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),

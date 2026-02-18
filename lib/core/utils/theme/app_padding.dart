@@ -13,6 +13,7 @@ class AppPadding {
   static EdgeInsets p20 = EdgeInsets.all(20.r);
   static EdgeInsets p24 = EdgeInsets.all(24.r);
   static EdgeInsets p32 = EdgeInsets.all(32.r);
+  static EdgeInsets p50 = EdgeInsets.all(50.r);
 
   // Symmetric padding
   static EdgeInsets px5 = EdgeInsets.symmetric(horizontal: 5.w);
@@ -45,7 +46,7 @@ class AppPadding {
   static EdgeInsets pxy1718 = EdgeInsets.symmetric(vertical: 20.h,horizontal: 17.w);
   static EdgeInsets pxy1225 = EdgeInsets.symmetric(vertical: 25.h,horizontal: 12.w);
 
-  static EdgeInsets pxy2214 = EdgeInsets.symmetric(vertical: 14.h,horizontal: 22.w);
+  static EdgeInsets pxy2214 = EdgeInsets.symmetric(vertical: 12.h,horizontal: 22.w);
   static EdgeInsets pxy2016 = EdgeInsets.symmetric(vertical: 16.h,horizontal: 20.w);
   static EdgeInsets pxy2020 = EdgeInsets.symmetric(vertical: 20.h,horizontal: 20.w);
   static EdgeInsets pxy2220 = EdgeInsets.symmetric(vertical: 20.h,horizontal: 22.w);

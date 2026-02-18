@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/firestore_service.dart';
 import '../../../core/services/pdf_service.dart';
+import '../../../data/models/profile.dart';
 import '../../../data/models/quotation_item.dart';
+import 'package:quatation_making/features/quotation/data/summary_model.dart';
 
 /// PROVIDER
 final quotationViewModelProvider =
@@ -23,9 +25,30 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
     return [];
   }
 
-  void addItem(QuotationItem item) {
-    state = [...state, item];
+  void addItem(QuotationItem newItem) {
+    final items = [...state];
+
+    final index = items.indexWhere((i) => isSameItem(i, newItem));
+
+    if (index != -1) {
+      // Item already exists → increase quantity
+      items[index] = items[index].copyWith(
+        qty: items[index].qty + newItem.qty,
+      );
+    } else {
+      // New item → add
+      items.add(newItem);
+    }
+
+    state = items;
   }
+
+  bool isSameItem(QuotationItem a, QuotationItem b) {
+    return a.material == b.material &&
+        a.brand == b.brand &&
+        a.price == b.price;
+  }
+
 
   void removeItem(int index) {
     final list = [...state];
@@ -36,12 +59,16 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
   double get grandTotal =>
       state.fold(0.0, (sum, item) => sum + item.total);
 
-  Future<void> submitQuotation({bool clearAfter = false}) async {
+  Future<void> submitQuotation({
+    bool clearAfter = false,
+    PaymentSummary? summary,
+  }) async {
     if (state.isEmpty) return;
     _currentQuotationId = await _firestoreService.saveQuotation(
       state,
       grandTotal,
       id: _currentQuotationId,
+      summary: summary,
     );
     if (clearAfter) {
       state = [];
@@ -55,8 +82,12 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
     }
     return total;
   }
-  Future<void> downloadPdf() async {
+  Future<void> downloadPdf({required PaymentSummary summary}) async {
     if (state.isEmpty) return;
-    await _pdfService.generateQuotationPdf(state, grandTotal);
+    await _pdfService.generateQuotationPdf(
+      state,
+      grandTotal,
+      summary: summary,
+    );
   }
 }

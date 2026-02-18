@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quatation_making/core/utils/constants/app_spacing.dart';
+import 'package:quatation_making/core/utils/theme/app_radius.dart';
 import 'package:quatation_making/features/addMaterials/application/material_provider.dart';
 import 'package:quatation_making/features/addMaterials/data/model/material_model.dart';
 import 'package:quatation_making/features/drawer/view/end_drawer.dart';
@@ -99,15 +100,6 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
     // Clear only quantity field
     qtyCtrl.clear();
-
-    // Optional: Clear all fields if you want to start fresh
-    // materialCtrl.clear();
-    // brandCtrl.clear();
-    // warrantyYears = 0;
-    // ratingCtrl.clear();
-    // priceCtrl.clear();
-    // selectedMaterial = null;
-
     setState(() {});
   }
 
@@ -123,14 +115,12 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: const Text(
-          'Quotation',
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
+        title:Image.asset(AppAssets.appLogo,scale: 11,),
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_outline),
+            padding: EdgeInsets.zero,
+            icon: Image.asset(AppAssets.profile,scale: 7),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -139,17 +129,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
               );
             },
           ),
-          Builder(
-            builder: (scaffoldContext) {
-              return IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(scaffoldContext).openEndDrawer();
-
-                },
-              );
-            },
-          ),
+          AppSpacing.w8,
         ],
       ),
       body: Column(
@@ -166,12 +146,11 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                     ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Please Add your data',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 16,
-                      ),
+                    Image.asset(AppAssets.addQuot,scale: 5,),
+                    AppSpacing.h4,
+                     Text(
+                      'Please Make Your Quotation',
+                      style: AppTypography.body2,
                     ),
                   ],
                 )
@@ -198,6 +177,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: MaterialDropdownField(
@@ -214,26 +194,33 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                             },
                           ),
                         ),
-                        AppSpacing.w8,
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Expanded(
+                          flex: 1,
                           child: ReadOnlyField(
                             label: 'Brand',
                             controller: brandCtrl,
                           ),
                         ),
+                        AppSpacing.w8,
+                        Expanded(
+                            flex: 1,
+                            child:  ReadOnlyField(
+                              label: 'Warranty',
+                              controller: warrantyCtrl,
+                            )
+                        ),
                       ],
                     ),
                     AppSpacing.h8,
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          flex: 2,
-                          child:  ReadOnlyField(
-                            label: 'Warranty',
-                            controller: warrantyCtrl,
-                          )
-                        ),
-                        AppSpacing.w6,
                         Expanded(
                           child: ReadOnlyField(
                             label: 'Rating',
@@ -247,9 +234,18 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                             style: AppTypography.body2,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Qty',
-                              labelStyle: AppTypography.caption,
-                              border: const OutlineInputBorder(),
+                              hintText: 'Qty',
+                              helperText: ' ',        // 👈 critical
+                              errorMaxLines: 1,
+                              hintStyle: AppTypography.body1.copyWith(
+                                  color: AppColors.grey5D
+                              ),
+                              border:OutlineInputBorder(borderRadius: AppRadius.r20,borderSide: BorderSide.none),
+                              enabledBorder: OutlineInputBorder(borderRadius: AppRadius.r20,borderSide: BorderSide.none),
+                              focusedBorder: OutlineInputBorder(borderRadius: AppRadius.r20,borderSide: BorderSide.none),
+                              errorBorder: OutlineInputBorder(borderRadius: AppRadius.r20,borderSide: BorderSide.none),
+                              fillColor: AppColors.card,
+                              filled: true,
                               isDense: true,
                             ),
                             validator: (value) {
@@ -276,33 +272,49 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                               height: 48.h,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondaryButton,
-                                  foregroundColor: AppColors.textPrimary,
-                                  shape: RoundedRectangleBorder(
+                                  backgroundColor: AppColors.card,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(side: BorderSide(color: AppColors.grey63,width: 0.6),
+
                                     borderRadius: BorderRadius.circular(
-                                        AppDimens.buttonRadius),
+                                      AppDimens.buttonRadius,
+                                    ),
                                   ),
                                 ),
-                                // Update the submit button onPressed in your QuotationScreen
-                                onPressed: items.isEmpty || _isSubmitting
+                                onPressed: addItem,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add,color: AppColors.grey63,),
+                                    Text('Add',
+                                        style: AppTypography.body1.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.grey63)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          AppSpacing.w12,
+                          Expanded(
+                            child: SizedBox(
+                              height: 48.h,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                                onTap: items.isEmpty || _isSubmitting
                                     ? null
                                     : () async {
                                   setState(() {
                                     _isSubmitting = true;
                                   });
+
                                   try {
-                                    // await vm.submitQuotation();
-
-                                    // Calculate and set total amount
                                     final totalAmount = vm.calculateTotalAmount();
-                                    ref.read(summaryProvider.notifier).setTotalAmount(totalAmount);
-
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Quotation saved successfully'),
-                                      ),
-                                    );
+                                    ref
+                                        .read(summaryProvider.notifier)
+                                        .setTotalAmount(totalAmount);
 
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
@@ -310,12 +322,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                                       ),
                                     );
                                   } catch (e) {
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Failed to save quotation: $e'),
-                                      ),
-                                    );
+                                    debugPrint('Error: $e');
                                   } finally {
                                     if (mounted) {
                                       setState(() {
@@ -324,45 +331,47 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                                     }
                                   }
                                 },
-                                child: _isSubmitting
-                                    ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                                    gradient: items.isEmpty || _isSubmitting
+                                        ? LinearGradient(
+                                      colors: [
+                                        Colors.grey.withOpacity(0.4),
+                                        Colors.grey.withOpacity(0.4),
+                                      ],
+                                    )
+                                        : const LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        AppColors.blue4D,
+                                        AppColors.blueB3
+                                      ],
+                                    ),
                                   ),
-                                )
-                                    : Text(
-                                  'Submit',
-                                  style: AppTypography.body1.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          AppSpacing.w12,
-                          Expanded(
-                            child: SizedBox(
-                              height: 48.h,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        AppDimens.buttonRadius),
-                                  ),
-                                ),
-                                onPressed: addItem,
-                                child: Text('Add',
+                                  alignment: Alignment.center,
+                                  child: _isSubmitting
+                                      ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                      : Text(
+                                    'Next',
                                     style: AppTypography.body1.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.card)),
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
+
                         ],
                       ),
                     ),

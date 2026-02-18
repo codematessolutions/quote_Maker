@@ -33,21 +33,21 @@ class MenuItemWidget extends StatelessWidget {
         margin: AppPadding.pt10,
         padding: AppPadding.px16,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.lightBLueF5 : Colors.transparent,
+          color:AppColors.lightBLueF5,
           borderRadius: AppRadius.r10,
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryColor : AppColors.textSecondary,
+              color: AppColors.primaryColor,
               size: 22.w,
             ),
             SizedBox(width: 16.w),
             Text(
               text,
               style: AppTypography.body1.copyWith(
-                color: isSelected ? AppColors.primaryColor : AppColors.textSecondary,
+                color: AppColors.primaryColor,
                 fontWeight: FontWeight.w500,
               ),
             ),

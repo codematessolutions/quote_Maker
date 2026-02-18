@@ -10,6 +10,7 @@ import 'package:quatation_making/features/addMaterials/view/add_materials_screen
 import 'package:quatation_making/router/app_routes.dart';
 import 'package:quatation_making/widgets/menu_item_widget.dart';
 import 'package:quatation_making/widgets/version_text.dart';
+import 'package:quatation_making/features/quotation/view/quotation_history_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -30,7 +31,7 @@ class CustomDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AppSpacing.h26,
+                AppSpacing.h32,
 
                 Container(
                   height: 64,
@@ -87,13 +88,16 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 AppSpacing.h10,
                 MenuItemWidget(
-                  index: 0,
+                  index: 1,
                   selectedIndex: selectedIndex,
                   icon:Icons.history_outlined,
                   text: "History",
                   onTap: () {
-                    // customerPro.navigate(context, 0, const HomeScreen());
-                    // customerPro.unselectionDrawer();
+                    NavigationService.pop(context);
+                    NavigationService.push(
+                      context,
+                      const QuotationHistoryScreen(),
+                    );
                   },
                 ),
 

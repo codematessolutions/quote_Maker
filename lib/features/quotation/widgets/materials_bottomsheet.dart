@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quatation_making/core/utils/constants/app_assets.dart';
 import 'package:quatation_making/core/utils/theme/app_colors.dart';
+import 'package:quatation_making/core/utils/theme/app_padding.dart';
+import 'package:quatation_making/core/utils/theme/app_radius.dart';
 import 'package:quatation_making/core/utils/theme/app_typography.dart';
 import 'package:quatation_making/features/addMaterials/data/model/material_model.dart';
 
@@ -49,10 +51,20 @@ class MaterialDropdownField extends StatelessWidget {
             }
           },
           decoration: InputDecoration(
-            labelText: label,
-            labelStyle: AppTypography.caption,
-            border: const OutlineInputBorder(),
+            hintText: label,
+            hintStyle: AppTypography.body1.copyWith(
+              color: AppColors.grey5D
+            ),
+            border: OutlineInputBorder(borderRadius: AppRadius.r12,borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderRadius: AppRadius.r12,borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(borderRadius: AppRadius.r12,borderSide: BorderSide.none),
+            disabledBorder: OutlineInputBorder(borderRadius: AppRadius.r12,borderSide: BorderSide.none),
             isDense: true,
+            contentPadding: EdgeInsets.symmetric(vertical: 10),
+            helperText: ' ',        // 👈 critical
+            errorMaxLines: 1,
+            filled: true,
+            fillColor: AppColors.card,
             suffixIcon: Image.asset(
               AppAssets.circleArrowBottom,
               scale: 4.5,
@@ -68,6 +80,8 @@ class MaterialDropdownField extends StatelessWidget {
           labelStyle: AppTypography.caption,
           border: const OutlineInputBorder(),
           isDense: true,
+          filled: true,
+          fillColor: AppColors.card,
           suffixIcon: const SizedBox(
             width: 20,
             height: 20,

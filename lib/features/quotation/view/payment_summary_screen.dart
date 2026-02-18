@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quatation_making/core/utils/constants/constants.dart';
+import 'package:quatation_making/core/utils/snackbar_notification/snackbar_notification.dart';
 import 'package:quatation_making/core/utils/theme/app_colors.dart';
 import 'package:quatation_making/core/utils/theme/app_typography.dart';
 import 'package:quatation_making/features/quotation/application/summary_provider.dart';
+import 'package:quatation_making/features/quotation/data/summary_model.dart';
+import 'package:quatation_making/features/quotation/viewmodel/quotation_viewmodel.dart';
 
 class SummaryDetailsScreen extends ConsumerStatefulWidget {
   const SummaryDetailsScreen({super.key});
@@ -19,6 +22,8 @@ class SummaryDetailsScreen extends ConsumerStatefulWidget {
 class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   final specialOfferCtrl = TextEditingController();
   final advanceCtrl = TextEditingController();
+  bool _isSaving = false;
+  bool _hasSavedOnce = false;
 
   @override
   void dispose() {
@@ -37,19 +42,21 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final summary = ref.watch(summaryProvider);
+    final vm = ref.read(quotationViewModelProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title:  Text(
           'Payment Summary',
-          style: TextStyle(color: AppColors.textPrimary),
+          style: AppTypography.h5,
         ),
         centerTitle: false,
       ),
@@ -62,7 +69,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Column(
@@ -165,7 +172,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
                 ),
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 30.h),
 
               // Action Buttons
               Row(
@@ -175,20 +182,32 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
                       height: 48.h,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary, width: 2),
+                          side: BorderSide(
+                            color: _hasSavedOnce
+                                ? AppColors.primary
+                                : AppColors.textSecondary.withOpacity(0.3),
+                            width: 2,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                            borderRadius:
+                                BorderRadius.circular(AppDimens.buttonRadius),
                           ),
                         ),
-                        onPressed: () {
-                          // Export or Print functionality
-                          _showExportOptions(context);
-                        },
+                        onPressed: _hasSavedOnce
+                            ? () {
+                                final vm = ref
+                                    .read(quotationViewModelProvider.notifier);
+                                final summary = ref.read(summaryProvider);
+                                _showExportOptions(context, vm, summary);
+                              }
+                            : null,
                         child: Text(
                           'Export PDF',
                           style: AppTypography.body1.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                            color: _hasSavedOnce
+                                ? AppColors.primary
+                                : AppColors.textSecondary.withOpacity(0.5),
                           ),
                         ),
                       ),
@@ -205,17 +224,43 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
                             borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
                           ),
                         ),
-                        onPressed: () {
-                          // Save to Firestore
-                          _saveSummary();
-                        },
-                        child: Text(
-                          'Save & Continue',
-                          style: AppTypography.body1.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
+                        onPressed: _isSaving || _hasSavedOnce
+                            ? null
+                            : () async {
+                                setState(() {
+                                  _isSaving = true;
+                                });
+                                try {
+                                  // Save to Firestore
+                                  await vm.submitQuotation(summary: summary);
+                                  NotificationSnack.showSuccess('Quotation saved successfully');
+                                  setState(() {
+                                    _hasSavedOnce = true;
+                                  });
+                                } finally {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isSaving = false;
+                                    });
+                                  }
+                                }
+                              },
+                        child: _isSaving
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text(
+                                _hasSavedOnce ? 'Saved' : 'Save & Continue',
+                                style: AppTypography.body1.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -402,7 +447,11 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
     );
   }
 
-  void _showExportOptions(BuildContext context) {
+  void _showExportOptions(
+    BuildContext context,
+    QuotationViewModel vm,
+    PaymentSummary summary,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -415,10 +464,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
               title: const Text('Export as PDF'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement PDF export
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PDF export feature coming soon')),
-                );
+                vm.downloadPdf(summary: summary);
               },
             ),
             ListTile(
@@ -438,14 +484,4 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
     );
   }
 
-  void _saveSummary() {
-    // TODO: Save to Firestore
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Summary saved successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    // Navigate to next screen or back to home
-  }
 }

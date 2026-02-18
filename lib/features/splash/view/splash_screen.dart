@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:quatation_making/core/utils/constants/app_assets.dart';
 import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 
 import '../../../core/utils/theme/app_colors.dart';
@@ -48,19 +49,8 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             AppSpacing.h24,
-              Text(
-                'Quote Maker',
-                style: AppTypography.h2,
-              ),
-              AppSpacing.h10,
-              Text(
-                'Create professional quotations in seconds',
-                style: AppTypography.body2.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
+             Image.asset(AppAssets.appLogo,)
+            
             ],
           ),
         ),
