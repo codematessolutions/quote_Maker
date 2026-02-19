@@ -33,6 +33,8 @@ class FirestoreService {
             'finalPayableAmount': summary.finalPayableAmount,
             'advance': summary.advance,
             'afterInstallation': summary.afterInstallation,
+            'customerName': summary.customerName,
+            'customerPhone': summary.customerPhone,
           },
       };
 

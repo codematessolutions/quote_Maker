@@ -24,6 +24,7 @@ class QuotationItemCard extends StatelessWidget {
       padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         color: AppColors.card,
+        border: Border(left: BorderSide(color: AppColors.primary,width: 3)),
         borderRadius: BorderRadius.circular(AppDimens.cardRadius),
         boxShadow: [
           BoxShadow(
@@ -47,13 +48,16 @@ class QuotationItemCard extends StatelessWidget {
                     Text(
                       item.material,
                       style: AppTypography.body2.copyWith(
-                        fontWeight: FontWeight.w600
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary
                       ),
                     ),
                     AppSpacing.h2,
                     Text(
                       item.brand,
-                      style:AppTypography.caption
+                      style:AppTypography.caption.copyWith(
+                        color: AppColors.grey69
+                      )
                     ),
                     // if (item.watt > 0) ...[
                     //   AppSpacing.h2,
@@ -73,12 +77,15 @@ class QuotationItemCard extends StatelessWidget {
                     '${item.qty} NOS',
                     style:AppTypography.body2.copyWith(
                       fontWeight: FontWeight.w600,
+                        color: AppColors.grey69
                     ),
                   ),
                   AppSpacing.h2,
                   Text(
                     '${item.warranty} ',
-                      style:AppTypography.caption
+                      style:AppTypography.caption.copyWith(
+                          color: AppColors.grey69
+                      )
                   ),
                 ],
               ),
@@ -90,7 +97,9 @@ class QuotationItemCard extends StatelessWidget {
             children: [
               Text(
                 ' ${item.rating}',
-                style:AppTypography.caption
+                  style:AppTypography.caption.copyWith(
+                      color: AppColors.grey69
+                  )
               ),
 
               IconButton(

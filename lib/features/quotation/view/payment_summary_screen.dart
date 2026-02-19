@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 // lib/screens/summary_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 import 'package:quatation_making/core/utils/constants/constants.dart';
 import 'package:quatation_making/core/utils/snackbar_notification/snackbar_notification.dart';
 import 'package:quatation_making/core/utils/theme/app_colors.dart';
+import 'package:quatation_making/core/utils/theme/app_padding.dart';
+import 'package:quatation_making/core/utils/theme/app_radius.dart';
 import 'package:quatation_making/core/utils/theme/app_typography.dart';
 import 'package:quatation_making/features/quotation/application/summary_provider.dart';
 import 'package:quatation_making/features/quotation/data/summary_model.dart';
@@ -22,6 +26,8 @@ class SummaryDetailsScreen extends ConsumerStatefulWidget {
 class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   final specialOfferCtrl = TextEditingController();
   final advanceCtrl = TextEditingController();
+  final customerNameCtrl = TextEditingController();
+  final customerPhoneCtrl = TextEditingController();
   bool _isSaving = false;
   bool _hasSavedOnce = false;
 
@@ -29,6 +35,8 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   void dispose() {
     specialOfferCtrl.dispose();
     advanceCtrl.dispose();
+    customerNameCtrl.dispose();
+    customerPhoneCtrl.dispose();
     super.dispose();
   }
 
@@ -42,6 +50,8 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final summary = ref.watch(summaryProvider);
+    customerNameCtrl.text = summary.customerName;
+    customerPhoneCtrl.text = summary.customerPhone;
     final vm = ref.read(quotationViewModelProvider.notifier);
 
     return Scaffold(
@@ -65,11 +75,69 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
           padding: EdgeInsets.all(16.w),
           child: Column(
             children: [
+              // Customer details section
+              Container(
+                margin: EdgeInsets.only(bottom: 16.h),
+                padding: AppPadding.p14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: AppRadius.r10,
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CUSTOMER DETAILS',
+                      style: AppTypography.body1.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    TextField(
+                      controller: customerNameCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Customer Name',
+                        labelStyle: AppTypography.body2,
+                        border: OutlineInputBorder(
+                          borderRadius: AppRadius.r8,
+                        ),
+                        isDense: true,
+                      ),
+                      onChanged: (value) {
+                        ref.read(summaryProvider.notifier).setCustomerName(value.trim());
+                      },
+                    ),
+                    AppSpacing.h12,
+                    TextField(
+                      controller: customerPhoneCtrl,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        labelStyle: AppTypography.body2,
+                        border: OutlineInputBorder(
+                          borderRadius: AppRadius.r8,
+                        ),
+                        isDense: true,
+                      ),
+                      onChanged: (value) {
+                        ref.read(summaryProvider.notifier).setCustomerPhone(value.trim());
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
               // Amount Summary Section
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: AppRadius.r10,
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Column(
@@ -300,8 +368,8 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
                 Text(
                   label,
                   style: AppTypography.body1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: isHeader || isFinal ? 14.sp : 13.sp,
+                    fontWeight: FontWeight.w600,
+                    fontSize: isHeader || isFinal ? 14.sp : 12.sp,
                     letterSpacing: 0.5,
                   ),
                 ),

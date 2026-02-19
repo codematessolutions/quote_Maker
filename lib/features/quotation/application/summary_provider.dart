@@ -14,6 +14,14 @@ class SummaryNotifier extends StateNotifier<PaymentSummary> {
     state = state.copyWith(totalAmount: amount);
   }
 
+  void setCustomerName(String name) {
+    state = state.copyWith(customerName: name);
+  }
+
+  void setCustomerPhone(String phone) {
+    state = state.copyWith(customerPhone: phone);
+  }
+
   void setSpecialOffer(double offer) {
     state = state.copyWith(specialOffer: offer);
   }

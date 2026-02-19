@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:quatation_making/core/utils/constants/app_assets.dart';
+import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 
 import '../../../core/utils/theme/app_colors.dart';
 import '../../../core/utils/theme/app_typography.dart';
@@ -79,41 +81,66 @@ class QuotationHistoryScreen extends ConsumerWidget {
                     (summaryMap['specialOffer'] as num? ?? 0).toDouble(),
                 advance:
                     (summaryMap['advance'] as num? ?? 0).toDouble(),
+                customerName:
+                    (summaryMap['customerName'] as String?) ?? '',
+                customerPhone:
+                    (summaryMap['customerPhone'] as String?) ?? '',
               );
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  title: Text(
-                    'Quotation #${docs.length - index}',
-                    style: AppTypography.body1.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (createdAt != null)
-                        Text(
-                          dateFormat.format(createdAt),
-                          style: AppTypography.caption,
+              return InkWell(
+                onTap: () async {
+                  await pdfService.generateQuotationPdf(items, total, summary: summary);
+                },
+                child: Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  color: AppColors.card,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(AppAssets.documents,scale: 5.5,),
+                        AppSpacing.w4,
+                        // Left: main info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Text(
+                              //   'Quotation #${docs.length - index}',
+                              //   style: AppTypography.body1.copyWith(fontWeight: FontWeight.w600),
+                              // ),
+                              if (summary.customerName.isNotEmpty)
+                                Text(
+                                    summary.customerName,
+                                    style: AppTypography.h3.copyWith(
+                                  color: AppColors.primary
+                                )),
+                              AppSpacing.h4,
+                              if (summary.customerPhone.isNotEmpty)
+                                Text(' ${summary.customerPhone}', style: AppTypography.body2.copyWith(
+                                  color: AppColors.grey69
+                                )),
+                            ],
+                          ),
                         ),
-                      Text(
-                        'Total: ₹${total.toStringAsFixed(0)}',
-                        style: AppTypography.caption,
-                      ),
-                    ],
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.picture_as_pdf),
-                    color: AppColors.primary,
-                    onPressed: () async {
-                      await pdfService.generateQuotationPdf(
-                        items,
-                        total,
-                        summary: summary,
-                      );
-                    },
+                        // Right: date + action
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(total),
+                              style: AppTypography.h5,
+                            ),
+                            AppSpacing.h4,
+                            if (createdAt != null)
+                              Text(dateFormat.format(createdAt), style:
+                              AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

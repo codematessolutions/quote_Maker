@@ -20,7 +20,6 @@ import '../viewmodel/quotation_viewmodel.dart';
 import '../widgets/quotation_item_card.dart';
 import '../../../data/models/quotation_item.dart';
 import '../../../core/utils/constants/constants.dart';
-import 'summary_screen.dart';
 import '../../profile/view/profile_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -120,7 +119,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
         actions: [
           IconButton(
             padding: EdgeInsets.zero,
-            icon: Image.asset(AppAssets.profile,scale: 7),
+            icon: Image.asset(AppAssets.profile,scale: 6),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(

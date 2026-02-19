@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:quatation_making/core/utils/constants/app_assets.dart';
 
 import '../../data/models/profile.dart';
 import '../../data/models/quotation_item.dart';
@@ -17,9 +18,18 @@ class PdfService {
     try {
       final pdf = pw.Document();
       final ttf = pw.Font.ttf(
-        await rootBundle.load('assets/fonts/noto-sans.regular.ttf'),
-      );
+        await rootBundle.load('assets/fonts/noto-sans.regular.ttf'),);
 
+      final ByteData imageData = await rootBundle.load(AppAssets.solar);
+      final Uint8List imageBytes = imageData.buffer.asUint8List();
+      final ByteData logo = await rootBundle.load(AppAssets.appLogo);
+      final Uint8List logoImage = logo.buffer.asUint8List();
+      final pw.MemoryImage image = pw.MemoryImage(imageBytes);
+      final pw.MemoryImage logoImage2 = pw.MemoryImage(logoImage);
+
+      final ByteData mImage = await rootBundle.load(AppAssets.mudra);
+      final Uint8List mImage1 = mImage.buffer.asUint8List();
+      final pw.MemoryImage mudraImage = pw.MemoryImage(mImage1);
       final theme = pw.ThemeData.withFont(
         base: ttf,
         bold: ttf,
@@ -33,47 +43,61 @@ class PdfService {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-                pw.SizedBox(height: 40),
+                pw.Center(
+                  child: pw.Image(
+                    image,
+                    width: context.page.pageFormat.availableWidth,
+                    height: 150,
+                    fit: pw.BoxFit.cover,
+                  ),
+                ),
+                pw.SizedBox(height: 50),
                 pw.Text(
-                   'BAYMENT SOLAR',
+                  'PROPOSAL',
                   style: pw.TextStyle(
-                    fontSize: 26,
+                    fontSize: 32,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.blue800,
                   ),
                   textAlign: pw.TextAlign.center,
                 ),
-                pw.SizedBox(height: 8),
-                pw.Text(
-                  'ERNAKULAM | PATTAMBI | VALANCHERY | KANNUR',
-                  style: const pw.TextStyle(
-                    fontSize: 12,
-                    color: PdfColors.blue,
+                pw.SizedBox(height: 10),
+                pw.Center(
+                  child: pw.Image(
+                    logoImage2,
+                    width: context.page.pageFormat.availableWidth,
+                    height: 100,
+                    fit: pw.BoxFit.contain,
+                  ),
+                ),
+
+                pw.SizedBox(height: 6),
+                pw.Center(
+                  child: pw.Image(
+                    mudraImage,
+                    width: context.page.pageFormat.availableWidth,
+                    height: 90,
+                    fit: pw.BoxFit.contain,
                   ),
                 ),
                 pw.Spacer(),
                 pw.Text(
-                  'BAYMENT SOLAR',
+                  '+91 77366 84546, +91 80861 38435',
                   style: pw.TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue700,
+                    color: PdfColors.grey,
                   ),
                 ),
                 pw.SizedBox(height: 6),
                 pw.Text(
-                  '86066 93000 | 86066 98000',
-                  style: const pw.TextStyle(fontSize: 11),
+                  'energyecovolt71@gmail.com',
+                  style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey,),
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  'contact@baymentsolar.com  |  www.baymentsolar.com',
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  'Facebook: @Bayment solar   |   Instagram: @baymentsolar_',
-                  style: const pw.TextStyle(fontSize: 10),
+                  'ecovoltenergy',
+                  style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey,),
                 ),
                 pw.SizedBox(height: 40),
               ],
