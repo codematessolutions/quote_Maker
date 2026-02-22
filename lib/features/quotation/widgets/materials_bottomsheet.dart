@@ -51,8 +51,8 @@ class MaterialDropdownField extends StatelessWidget {
             }
           },
           decoration: InputDecoration(
-            hintText: label,
-            hintStyle: AppTypography.body1.copyWith(
+            labelText: label,
+            labelStyle: AppTypography.body1.copyWith(
               color: AppColors.grey5D
             ),
             border: OutlineInputBorder(borderRadius: AppRadius.r12,borderSide: BorderSide.none),
@@ -123,24 +123,45 @@ class MaterialSelectionSheet extends StatefulWidget {
 }
 
 class MaterialSelectionSheetState extends State<MaterialSelectionSheet> {
-  late List<MaterialModel> filteredMaterials;
+  // Group materials by materialId instead of name for better data integrity
+  late Map<String, List<MaterialModel>> groupedByMaterialId;
+  late List<String> filteredMaterialIds;
   final searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    filteredMaterials = widget.materials;
+    _buildGroupedMaterials();
+    filteredMaterialIds = groupedByMaterialId.keys.toList();
+  }
+
+  void _buildGroupedMaterials() {
+    groupedByMaterialId = <String, List<MaterialModel>>{};
+    for (final material in widget.materials) {
+      groupedByMaterialId
+          .putIfAbsent(material.materialId, () => <MaterialModel>[])
+          .add(material);
+    }
   }
 
   void filterMaterials(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredMaterials = widget.materials;
+        filteredMaterialIds = groupedByMaterialId.keys.toList();
       } else {
-        filteredMaterials = widget.materials
-            .where((m) =>
-        m.materialName.toLowerCase().contains(query.toLowerCase()) ||
-            m.brand.toLowerCase().contains(query.toLowerCase()))
+        final lowerQuery = query.toLowerCase();
+        filteredMaterialIds = groupedByMaterialId.entries
+            .where((entry) {
+              final variants = entry.value;
+              if (variants.isEmpty) return false;
+              final materialName =
+                  variants.first.materialName.toLowerCase();
+              final hasMatchingBrand = variants.any(
+                (m) => m.brand.toLowerCase().contains(lowerQuery),
+              );
+              return materialName.contains(lowerQuery) || hasMatchingBrand;
+            })
+            .map((e) => e.key)
             .toList();
       }
     });
@@ -185,41 +206,176 @@ class MaterialSelectionSheetState extends State<MaterialSelectionSheet> {
             ),
           ),
           Expanded(
-            child: filteredMaterials.isEmpty
+            child: filteredMaterialIds.isEmpty
                 ? const Center(
-              child: Text('No materials found'),
-            )
+                    child: Text('No materials found'),
+                  )
                 : ListView.builder(
-              itemCount: filteredMaterials.length,
+                    itemCount: filteredMaterialIds.length,
+                    itemBuilder: (context, index) {
+                      final materialId = filteredMaterialIds[index];
+                      final variants = groupedByMaterialId[materialId] ??
+                          <MaterialModel>[];
+                      if (variants.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final materialName = variants.first.materialName;
+                      final isSelected =
+                          widget.currentSelection?.materialId == materialId;
+
+                      final variantCount = variants.length;
+                      String subtitleText;
+                      if (variantCount == 1) {
+                        final m = variants.first;
+                        subtitleText =
+                            '${m.brand} • ${m.warranty}Y warranty • ⭐ ${m.rating}';
+                      } else {
+                        final brandSet = variants.map((m) => m.brand).toSet();
+                        final brandsPreview = brandSet.take(3).join(', ');
+                        final moreCount = brandSet.length - 3;
+                        final moreText =
+                            moreCount > 0 ? ' +$moreCount more' : '';
+                        subtitleText =
+                            '$variantCount brands • $brandsPreview$moreText';
+                      }
+
+                      return ListTile(
+                        selected: isSelected,
+                        selectedTileColor:
+                            AppColors.primary.withOpacity(0.1),
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.category,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          materialName,
+                          style: AppTypography.body1.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          subtitleText,
+                          style: AppTypography.caption,
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle,
+                                color: AppColors.primary)
+                            : null,
+                        onTap: () async {
+                          final variantsForId =
+                              groupedByMaterialId[materialId] ??
+                                  <MaterialModel>[];
+
+                          if (variantsForId.isEmpty) return;
+
+                          // If there is only one brand for this material, select it directly.
+                          if (variantsForId.length == 1) {
+                            Navigator.pop(context, variantsForId.first);
+                            return;
+                          }
+
+                          // Otherwise, let the user pick a brand variant.
+                          final selected =
+                              await showModalBottomSheet<MaterialModel>(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => BrandSelectionSheet(
+                              materialName: materialName,
+                              variants: variantsForId,
+                              currentSelection: widget.currentSelection,
+                            ),
+                          );
+
+                          if (!mounted) return;
+
+                          if (selected != null) {
+                            Navigator.pop(context, selected);
+                          }
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BrandSelectionSheet extends StatelessWidget {
+  final String materialName;
+  final List<MaterialModel> variants;
+  final MaterialModel? currentSelection;
+
+  const BrandSelectionSheet({
+    super.key,
+    required this.materialName,
+    required this.variants,
+    this.currentSelection,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Select brand for $materialName',
+                  style: AppTypography.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: variants.length,
               itemBuilder: (context, index) {
-                final material = filteredMaterials[index];
-                final isSelected =
-                    widget.currentSelection?.id == material.id;
+                final material = variants[index];
+                final isSelected = currentSelection?.id == material.id;
 
                 return ListTile(
                   selected: isSelected,
                   selectedTileColor: AppColors.primary.withOpacity(0.1),
-                  leading: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.category,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
                   title: Text(
-                    material.materialName,
+                    material.brand,
                     style: AppTypography.body1.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: Text(
-                    '${material.brand} • ${material.warranty}Y warranty • ⭐ ${material.rating}',
+                    '${material.warranty}Y warranty • ⭐ ${material.rating} • ₹${material.price.toStringAsFixed(2)}',
                     style: AppTypography.caption,
                   ),
                   trailing: isSelected

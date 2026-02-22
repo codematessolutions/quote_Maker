@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
       minTextAdapt: false,
       designSize: const Size(375, 812),
       child: MaterialApp(
-        title: 'Quote Maker',
+        title: 'Ecovolt',
         scaffoldMessengerKey: NavigationService.scaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

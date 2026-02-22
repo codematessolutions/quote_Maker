@@ -4,10 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quatation_making/features/addMaterials/data/model/material_model.dart';
 
+
+
+// ✅ TOP LEVEL — outside everything
 final materialRepositoryProvider = Provider<MaterialRepository>((ref) {
   return MaterialRepository(FirebaseFirestore.instance);
 });
 
+// ✅ TOP LEVEL — outside everything
+final materialsProvider = StreamProvider<List<MaterialModel>>((ref) {
+  return ref.read(materialRepositoryProvider).getMaterials();
+});
+
+// ✅ Class stays clean — no providers inside
 class MaterialRepository {
   final FirebaseFirestore _firestore;
 

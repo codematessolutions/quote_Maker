@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:quatation_making/core/utils/constants/app_assets.dart';
 import 'package:quatation_making/core/utils/constants/app_spacing.dart';
@@ -114,8 +115,9 @@ class QuotationHistoryScreen extends ConsumerWidget {
                               if (summary.customerName.isNotEmpty)
                                 Text(
                                     summary.customerName,
-                                    style: AppTypography.h3.copyWith(
-                                  color: AppColors.primary
+                                    style: AppTypography.body1.copyWith(
+                                  color: AppColors.primary,
+                                      fontWeight: FontWeight.w600
                                 )),
                               AppSpacing.h4,
                               if (summary.customerPhone.isNotEmpty)
@@ -136,7 +138,7 @@ class QuotationHistoryScreen extends ConsumerWidget {
                             AppSpacing.h4,
                             if (createdAt != null)
                               Text(dateFormat.format(createdAt), style:
-                              AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                              AppTypography.caption.copyWith(color: AppColors.textSecondary,fontSize: 11.sp)),
                           ],
                         ),
                       ],

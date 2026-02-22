@@ -23,26 +23,32 @@ class AddMaterialScreen extends ConsumerWidget {
     final addMaterialNotifier = ref.read(addMaterialProvider.notifier);
     final addMaterialState = ref.watch(addMaterialProvider);
 
-    ref.listen<AsyncValue<void>>(addMaterialProvider, (previous, state) {
-      state.whenOrNull(
-        data: (_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Material added successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pop(context);
-        },
-        error: (error, stack) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${error.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        },
-      );
+    // Only react when a save finishes (loading -> data or error),
+    // so adding/removing brand rows won't close the screen.
+    ref.listen<AddMaterialState>(addMaterialProvider, (previous, state) {
+      final prevStatus = previous?.status;
+      final nextStatus = state.status;
+
+      // Success: only when we were loading before and now have data
+      if (prevStatus is AsyncLoading && nextStatus is AsyncData) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Materials added successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+
+      // Error: only when we transition into an error state
+      if (nextStatus is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${nextStatus.error}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     });
 
     return Scaffold(
@@ -69,7 +75,8 @@ class AddMaterialScreen extends ConsumerWidget {
                       padding: AppPadding.pxy2214,
                       child: CustomTextFormField(
                         hint: 'Material Name',
-                        controller: addMaterialNotifier.materialNameController,
+                        controller:
+                            addMaterialNotifier.materialNameController,
                         keyboardType: TextInputType.name,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -80,70 +87,106 @@ class AddMaterialScreen extends ConsumerWidget {
                         textInputAction: TextInputAction.next,
                       ),
                     ),
-                    Padding(
-                      padding: AppPadding.pxy2214,
-                      child: CustomTextFormField(
-                        hint: 'Brand',
-                        controller: addMaterialNotifier.brandController,
-                        keyboardType: TextInputType.name,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Brand';
-                          }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.next,
-                      ),
+                    // Dynamic list of brand variants
+                    ...List.generate(
+                      addMaterialState.brandInputs.length,
+                      (index) {
+                        final brandInput =
+                            addMaterialState.brandInputs[index];
+                        final isFirst = index == 0;
+                        return Padding(
+                          padding: AppPadding.pxy2214,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Brand Variant ${index + 1}',
+                                    style: AppTypography.body2,
+                                  ),
+                                  if (!isFirst)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline,
+                                          color: Colors.redAccent),
+                                      onPressed: () {
+                                        addMaterialNotifier
+                                            .removeBrandRow(index);
+                                      },
+                                    ),
+                                ],
+                              ),
+                              AppSpacing.h6,
+                              CustomTextFormField(
+                                hint: 'Brand',
+                                controller: brandInput.brandController,
+                                keyboardType: TextInputType.name,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter Brand';
+                                  }
+                                  return null;
+                                },
+                                textInputAction: TextInputAction.next,
+                              ),
+                              AppSpacing.h8,
+                              CustomTextFormField(
+                                hint: 'Warranty',
+                                controller: brandInput.warrantyController,
+                                keyboardType: TextInputType.text,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter Warranty';
+                                  }
+                                  return null;
+                                },
+                                textInputAction: TextInputAction.next,
+                              ),
+                              AppSpacing.h8,
+                              CustomTextFormField(
+                                hint: 'Rating',
+                                controller: brandInput.ratingController,
+                                keyboardType: TextInputType.text,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter Rating';
+                                  }
+                                  return null;
+                                },
+                                textInputAction: TextInputAction.next,
+                              ),
+                              AppSpacing.h8,
+                              CustomTextFormField(
+                                hint: 'Price',
+                                controller: brandInput.priceController,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter Price';
+                                  }
+                                  if (double.tryParse(value) == null) {
+                                    return 'Please enter a valid number';
+                                  }
+                                  return null;
+                                },
+                                textInputAction: TextInputAction.done,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                     Padding(
                       padding: AppPadding.pxy2214,
-                      child: CustomTextFormField(
-                        hint: 'Warranty',
-                        controller: addMaterialNotifier.warrantyController,
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Warranty';
-                          }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                    Padding(
-                      padding: AppPadding.pxy2214,
-                      child: CustomTextFormField(
-                        hint: 'Rating',
-                        controller: addMaterialNotifier.ratingController,
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Rating';
-                          }
-                          // if (double.tryParse(value) == null) {
-                          //   return 'Please enter a valid number';
-                          // }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                    Padding(
-                      padding: AppPadding.pxy2214,
-                      child: CustomTextFormField(
-                        hint: 'Price',
-                        controller: addMaterialNotifier.priceController,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Price';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.done,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: addMaterialNotifier.addBrandRow,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add another brand'),
+                        ),
                       ),
                     ),
                     AppSpacing.h18,
@@ -168,14 +211,16 @@ class AddMaterialScreen extends ConsumerWidget {
                               BorderRadius.circular(AppDimens.buttonRadius),
                             ),
                           ),
-                          onPressed: addMaterialState.isLoading
+                          onPressed: addMaterialState.status.isLoading
                               ? null
                               : () {
                             if (formKey.currentState!.validate()) {
-                              ref.read(addMaterialProvider.notifier).addMaterial();
+                              ref
+                                  .read(addMaterialProvider.notifier)
+                                  .addMaterials();
                             }
                           },
-                          child: addMaterialState.isLoading
+                          child: addMaterialState.status.isLoading
                               ? const SizedBox(
                             height: 20,
                             width: 20,

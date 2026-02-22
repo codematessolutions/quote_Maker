@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:quatation_making/core/utils/constants/app_assets.dart';
 import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 import 'package:quatation_making/core/utils/theme/app_colors.dart';
@@ -12,6 +13,7 @@ import 'package:quatation_making/features/profile/view/widgets/bank_details_row.
 import 'package:quatation_making/features/quotation/view/quotation_history_screen.dart';
 import 'package:quatation_making/router/app_routes.dart';
 import 'package:quatation_making/widgets/custom_button.dart';
+import 'package:quatation_making/widgets/version_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> _openUrl(String url) async {
@@ -192,6 +194,25 @@ class BaymentProfileHeader extends StatelessWidget {
                   NavigationService.pop(context);
                   NavigationService.push(context, AddMaterialScreen());
                 },
+              ),
+              AppSpacing.h24,
+              SafeArea(
+                minimum: EdgeInsets.only(
+                  top: 22.h,
+                  bottom: 25.h, // Extra safe margin for all devices
+                ),
+                child: Align(
+                  alignment: .bottomCenter,
+                  child:  FutureBuilder(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox();
+                      final info = snapshot.data!;
+                      return VersionText(
+                          label: 'Version', value: "${info.version}+${info.buildNumber}");
+                    },
+                  ),
+                ),
               ),
           
             ],

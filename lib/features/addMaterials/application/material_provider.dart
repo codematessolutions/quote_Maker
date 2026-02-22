@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:quatation_making/features/addMaterials/data/model/material_model.dart';
 
+
 final materialsProvider = StreamProvider<List<MaterialModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('materials')

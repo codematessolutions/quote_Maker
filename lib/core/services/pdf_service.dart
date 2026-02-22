@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:quatation_making/core/utils/constants/app_assets.dart';
+import 'package:quatation_making/core/utils/theme/app_colors.dart';
 
 import '../../data/models/profile.dart';
 import '../../data/models/quotation_item.dart';
@@ -47,7 +48,7 @@ class PdfService {
                   child: pw.Image(
                     image,
                     width: context.page.pageFormat.availableWidth,
-                    height: 150,
+                    height: 190,
                     fit: pw.BoxFit.cover,
                   ),
                 ),
@@ -118,14 +119,14 @@ class PdfService {
               children: [
                 pw.Container(
                   padding: const pw.EdgeInsets.symmetric(vertical: 8),
-                  color: PdfColors.green50,
+                  color: PdfColors.blueAccent,
                   child: pw.Center(
                     child: pw.Text(
-                      'ONGRID PROJECT MATERIAL LIST',
+                      '3KW ONGRID PROJECT MATERIAL LIST',
                       style: pw.TextStyle(
                         fontSize: 14,
                         fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.black,
+                        color: PdfColors.white,
                       ),
                     ),
                   ),
@@ -142,7 +143,7 @@ class PdfService {
                   },
                   children: [
                     pw.TableRow(
-                      decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                      decoration: const pw.BoxDecoration(color: PdfColors.blue100,),
                       children: [
                         _tableHeaderCell('MATERIALS'),
                         _tableHeaderCell('COMPANY'),
@@ -219,6 +220,7 @@ class PdfService {
                   style:  pw.TextStyle(
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.grey700
                   ),
                   textAlign: pw.TextAlign.center,
                 ),
@@ -243,11 +245,11 @@ class PdfService {
                   child: pw.Text(
                     'TERMS AND CONDITIONS',
                     style: pw.TextStyle(
-                      fontSize: 14,
+                      fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
                       fontStyle: pw.FontStyle.italic,
-                      color: PdfColors.blue,
-                      decoration: pw.TextDecoration.underline,
+                      color: PdfColors.black,
+                      // decoration: pw.TextDecoration.underline,
                     ),
                   ),
                 ),
@@ -350,6 +352,7 @@ pw.Widget _tableHeaderCell(String text) {
         style: pw.TextStyle(
           fontSize: 9,
           fontWeight: pw.FontWeight.bold,
+          color: PdfColors.black
         ),
         textAlign: pw.TextAlign.center,
       ),
@@ -364,7 +367,7 @@ pw.Widget _tableCell(String text, {bool alignRight = false}) {
       alignment: alignRight ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
       child: pw.Text(
         text,
-        style: const pw.TextStyle(fontSize: 9),
+        style: const pw.TextStyle(fontSize: 9,color: PdfColors.grey900),
       ),
     ),
   );
@@ -485,12 +488,12 @@ pw.TableRow _summaryTableRow(
         child: pw.Text(
           label,
           style: pw.TextStyle(
-            fontSize: 10,
+            fontSize: 12,
             fontWeight: bold || isHeaderRow
                 ? pw.FontWeight.bold
                 : pw.FontWeight.normal,
             color: emphasisRed
-                ? PdfColors.red
+                ? PdfColors.green
                 :PdfColors.black,
           ),
         ),
@@ -507,7 +510,7 @@ pw.TableRow _summaryTableRow(
               // fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
               fontWeight:  pw.FontWeight.bold,
               color: emphasisRed
-                  ? PdfColors.red
+                  ? PdfColors.green
                   : PdfColors.black,
             ),
           ),

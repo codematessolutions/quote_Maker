@@ -83,11 +83,22 @@ class QuotationViewModel extends Notifier<List<QuotationItem>> {
     return total;
   }
   Future<void> downloadPdf({required PaymentSummary summary}) async {
-    if (state.isEmpty) return;
-    await _pdfService.generateQuotationPdf(
-      state,
-      grandTotal,
-      summary: summary,
-    );
+    try {
+      if (state.isEmpty) {
+        throw Exception('No quotation items found');
+      }
+      await _pdfService.generateQuotationPdf(
+        state,
+        grandTotal,
+        summary: summary,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  void clearQuotation() {
+    state = [];
+    _currentQuotationId = null;
   }
 }

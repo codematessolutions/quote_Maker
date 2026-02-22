@@ -20,10 +20,10 @@ class ReadOnlyField extends StatelessWidget {
       readOnly: true,
       style: AppTypography.body2,
       decoration: InputDecoration(
-        hintText: label,
+        labelText: label,
         helperText: ' ',        // 👈 critical
         errorMaxLines: 1,
-        hintStyle: AppTypography.body1.copyWith(
+        labelStyle: AppTypography.body1.copyWith(
             color: AppColors.grey5D
         ),
         border:OutlineInputBorder(borderRadius: AppRadius.r20,borderSide: BorderSide.none),

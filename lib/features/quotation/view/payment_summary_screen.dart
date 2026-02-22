@@ -29,7 +29,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   final customerNameCtrl = TextEditingController();
   final customerPhoneCtrl = TextEditingController();
   bool _isSaving = false;
-  bool _hasSavedOnce = false;
+   bool _hasSavedOnce = false;
 
   @override
   void dispose() {
@@ -46,12 +46,10 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
           (Match m) => '${m[1]},',
     )}/-';
   }
-
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final summary = ref.watch(summaryProvider);
-    customerNameCtrl.text = summary.customerName;
-    customerPhoneCtrl.text = summary.customerPhone;
     final vm = ref.read(quotationViewModelProvider.notifier);
 
     return Scaffold(
@@ -73,268 +71,297 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(16.w),
-          child: Column(
-            children: [
-              // Customer details section
-              Container(
-                margin: EdgeInsets.only(bottom: 16.h),
-                padding: AppPadding.p14,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: AppRadius.r10,
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'CUSTOMER DETAILS',
-                      style: AppTypography.body1.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-                    TextField(
-                      controller: customerNameCtrl,
-                      decoration: InputDecoration(
-                        labelText: 'Customer Name',
-                        labelStyle: AppTypography.body2,
-                        border: OutlineInputBorder(
-                          borderRadius: AppRadius.r8,
-                        ),
-                        isDense: true,
-                      ),
-                      onChanged: (value) {
-                        ref.read(summaryProvider.notifier).setCustomerName(value.trim());
-                      },
-                    ),
-                    AppSpacing.h12,
-                    TextField(
-                      controller: customerPhoneCtrl,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
-                      ],
-                      decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        labelStyle: AppTypography.body2,
-                        border: OutlineInputBorder(
-                          borderRadius: AppRadius.r8,
-                        ),
-                        isDense: true,
-                      ),
-                      onChanged: (value) {
-                        ref.read(summaryProvider.notifier).setCustomerPhone(value.trim());
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              // Amount Summary Section
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: AppRadius.r10,
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Column(
-                  children: [
-                    _buildAmountRow(
-                      'TOTAL AMOUNT',
-                      formatCurrency(summary.totalAmount),
-                      isHeader: true,
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildAmountRow(
-                      'SUBSIDY',
-                      formatCurrency(summary.subsidy),
-                      subtitle: '(Subsidy cheque to be submitted at the time of registration)',
-                      isSubsidy: true,
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildAmountRow(
-                      'PAYABLE AMOUNT AFTER SUBSIDY',
-                      formatCurrency(summary.payableAfterSubsidy),
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildEditableRow(
-                      'NEW YEAR SPECIAL OFFER',
-                      specialOfferCtrl,
-                      onChanged: (value) {
-                        final offer = double.tryParse(value) ?? 0;
-                        ref.read(summaryProvider.notifier).setSpecialOffer(offer);
-                      },
-                      isSpecialOffer: true,
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildAmountRow(
-                      'FINAL PAYABLE AMOUNT',
-                      formatCurrency(summary.finalPayableAmount),
-                      isFinal: true,
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 24.h),
-
-              // Payment Schedule Section
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                // Customer details section
+                Container(
+                  margin: EdgeInsets.only(bottom: 16.h),
+                  padding: AppPadding.p14,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: AppRadius.r10,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CUSTOMER DETAILS',
+                        style: AppTypography.body1.copyWith(
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      child: Text(
-                        'PAYMENT SCHEDULE',
-                        style: AppTypography.h6.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildPaymentScheduleRow(
-                      'ADVANCE',
-                      '(Payable on material delivery)',
-                      advanceCtrl,
-                      onChanged: (value) {
-                        final advance = double.tryParse(value) ?? 0;
-                        ref.read(summaryProvider.notifier).setAdvance(advance);
-                      },
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    _buildAmountRow(
-                      'AFTER INSTALLATION',
-                      formatCurrency(summary.afterInstallation),
-                      isInstallation: true,
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: Text(
-                        'KSEB REGISTRATION FEES, KSEB SINGLE PHASE NET METER AND SRUCTUR WORK GI INCLUDED',
-                        style: AppTypography.caption.copyWith(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 30.h),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48.h,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: _hasSavedOnce
-                                ? AppColors.primary
-                                : AppColors.textSecondary.withOpacity(0.3),
-                            width: 2,
+                      SizedBox(height: 12.h),
+                      TextFormField(
+                        controller: customerNameCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Customer Name',
+                          labelStyle: AppTypography.body2,
+                          border: OutlineInputBorder(
+                            borderRadius: AppRadius.r8,
+                            borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppDimens.buttonRadius),
+                          isDense: true,
+                        ),
+                        onChanged: (value) {
+                          ref.read(summaryProvider.notifier).setCustomerName(value.trim());
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter customer name';
+                          }
+                          return null;
+                        },
+
+                      ),
+                      AppSpacing.h12,
+                      TextFormField(
+                        controller: customerPhoneCtrl,
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number',
+                          labelStyle: AppTypography.body2,
+                          border: OutlineInputBorder(
+                            borderRadius: AppRadius.r8,
+                          ),
+                          isDense: true,
+                        ),
+                        onChanged: (value) {
+                          ref.read(summaryProvider.notifier).setCustomerPhone(value.trim());
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter customer phone';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Amount Summary Section
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: AppRadius.r10,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildAmountRow(
+                        'TOTAL AMOUNT',
+                        formatCurrency(summary.totalAmount),
+                        isHeader: true,
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildAmountRow(
+                        'SUBSIDY',
+                        formatCurrency(summary.subsidy),
+                        subtitle: '(Subsidy cheque to be submitted at the time of registration)',
+                        isSubsidy: true,
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildAmountRow(
+                        'PAYABLE AMOUNT AFTER SUBSIDY',
+                        formatCurrency(summary.payableAfterSubsidy),
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildEditableRow(
+                        'NEW YEAR SPECIAL OFFER',
+                        specialOfferCtrl,
+                        onChanged: (value) {
+                          final offer = double.tryParse(value) ?? 0;
+                          ref.read(summaryProvider.notifier).setSpecialOffer(offer);
+                        },
+                        isSpecialOffer: true,
+                      ),
+
+                      _buildAmountRow(
+                        'FINAL PAYABLE AMOUNT',
+                        formatCurrency(summary.finalPayableAmount),
+                        isFinal: true,
+                      ),
+                    ],
+                  ),
+                ),
+
+                AppSpacing.h20,
+
+                // Payment Schedule Section
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:AppRadius.r12,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding:AppPadding.p12,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(10),
                           ),
                         ),
-                        onPressed: _hasSavedOnce
-                            ? () {
-                                final vm = ref
-                                    .read(quotationViewModelProvider.notifier);
-                                final summary = ref.read(summaryProvider);
-                                _showExportOptions(context, vm, summary);
-                              }
-                            : null,
                         child: Text(
-                          'Export PDF',
+                          'PAYMENT SCHEDULE',
                           style: AppTypography.body1.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _hasSavedOnce
-                                ? AppColors.primary
-                                : AppColors.textSecondary.withOpacity(0.5),
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
                           ),
+                          textAlign: TextAlign.start,
                         ),
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48.h,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildPaymentScheduleRow(
+                        'ADVANCE',
+                        '(Payable on material delivery)',
+                        advanceCtrl,
+                        onChanged: (value) {
+                          final advance = double.tryParse(value) ?? 0;
+                          ref.read(summaryProvider.notifier).setAdvance(advance);
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildAmountRow(
+                        'AFTER INSTALLATION',
+                        formatCurrency(summary.afterInstallation),
+                        isInstallation: true,
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      Padding(
+                        padding: EdgeInsets.all(12.w),
+                        child: Text(
+                          'KSEB REGISTRATION FEES, KSEB SINGLE PHASE NET METER AND SRUCTUR WORK GI INCLUDED',
+                          style: AppTypography.caption.copyWith(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.grey69
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        onPressed: _isSaving || _hasSavedOnce
-                            ? null
-                            : () async {
-                                setState(() {
-                                  _isSaving = true;
-                                });
-                                try {
-                                  // Save to Firestore
-                                  await vm.submitQuotation(summary: summary);
-                                  NotificationSnack.showSuccess('Quotation saved successfully');
-                                  setState(() {
-                                    _hasSavedOnce = true;
-                                  });
-                                } finally {
-                                  if (mounted) {
-                                    setState(() {
-                                      _isSaving = false;
-                                    });
-                                  }
+                      ),
+                    ],
+                  ),
+                ),
+
+               AppSpacing.h30,
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48.h,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: _hasSavedOnce
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary.withOpacity(0.3),
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppDimens.buttonRadius),
+                            ),
+                          ),
+                          onPressed: _hasSavedOnce
+                              ? () {
+                                  final vm = ref.read(quotationViewModelProvider.notifier);
+                                  final summary = ref.read(summaryProvider);
+                                  _showExportOptions(context, vm, summary);
                                 }
-                              },
-                        child: _isSaving
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : Text(
-                                _hasSavedOnce ? 'Saved' : 'Save & Continue',
-                                style: AppTypography.body1.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              : null,
+                          child: Text(
+                            'Export PDF',
+                            style: AppTypography.body1.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: _hasSavedOnce
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary.withOpacity(0.5),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48.h,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                            ),
+                          ),
+                          onPressed: _isSaving || _hasSavedOnce
+                              ? null
+                              : () async {
+                                  if(formKey.currentState!.validate()){
+                                    setState(() {
+                                      _isSaving = true;
+                                    });
+                                    try {
+                                      // Save to Firestore but don't clear items yet
+                                      await vm.submitQuotation(
+                                        summary: summary,
+                                        clearAfter: false,
+                                      );
+                                      // Don't reset summary provider - keep data for PDF generation
+                                      NotificationSnack.showSuccess('Quotation saved successfully');
+                                      // // Navigate back to QuotationScreen
+                                      // if (mounted) {
+                                      //   Navigator.pop(context);
+                                      // }
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() {
+                                          _hasSavedOnce=true;
+                                          _isSaving = false;
+                                        });
+                                      }
+                                    }
+                                  }
+                                  else{
+                                    NotificationSnack.showError('Please fill all the fields');
+                                  }
+                                },
+                          child: _isSaving
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  _hasSavedOnce ? 'Saved' : 'Save & Generate',
+                                  style: AppTypography.body1.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                AppSpacing.h40,
+              ],
+            ),
           ),
         ),
       ),
@@ -353,11 +380,17 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
       }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      color: isHeader
-          ? Colors.blue.shade50
+      decoration: BoxDecoration(
+        borderRadius:isHeader?
+        BorderRadius.only(topRight: Radius.circular(10.r),topLeft: Radius.circular(10.r)):isFinal?
+        BorderRadius.only(bottomLeft: Radius.circular(10.r),bottomRight: Radius.circular(10.r)):null,
+        color: isHeader
+      ? Colors.blue.shade50
           : isFinal
-          ? Colors.blue.shade50
-          : null,
+        ? Colors.blue.shade50
+        : null,
+      ),
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -411,7 +444,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
         bool isSpecialOffer = false,
       }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -428,25 +461,31 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
           ),
           SizedBox(
             width: 140.w,
-            child: TextField(
+            child: TextFormField(
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.right,
               style: AppTypography.h6.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
+                fontSize: 15.sp,
                 color: Colors.red,
               ),
               decoration: InputDecoration(
                 prefixText: '₹',
                 suffixText: '/-',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.r8,
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                 isDense: true,
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'enter special offer';
+                }
+                return null;
+              },
               onChanged: onChanged,
             ),
           ),
@@ -462,7 +501,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
         required Function(String) onChanged,
       }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -490,7 +529,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
           ),
           SizedBox(
             width: 140.w,
-            child: TextField(
+            child: TextFormField(
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.right,
@@ -501,13 +540,19 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
               decoration: InputDecoration(
                 prefixText: '₹',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.r8,
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                 isDense: true,
               ),
               onChanged: onChanged,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'enter advance';
+                }
+                return null;
+              },
             ),
           ),
         ],
@@ -528,16 +573,20 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-              title: const Text('Export as PDF'),
-              onTap: () {
+              leading: Icon(Icons.picture_as_pdf),
+              title:Text('Export as PDF',style: AppTypography.body1.copyWith(
+                fontWeight: FontWeight.w500,
+              ),),
+              onTap: () async {
                 Navigator.pop(context);
-                vm.downloadPdf(summary: summary);
+                _exportPdfWithLoading(context, vm, summary);
               },
             ),
             ListTile(
               leading: const Icon(Icons.share),
-              title: const Text('Share'),
+              title: Text('Share',style: AppTypography.body1.copyWith(
+              fontWeight: FontWeight.w500,
+              ),),
               onTap: () {
                 Navigator.pop(context);
                 // TODO: Implement share
@@ -550,6 +599,60 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _exportPdfWithLoading(
+    BuildContext context,
+    QuotationViewModel vm,
+    PaymentSummary summary,
+  ) async {
+    // Show loading dialog
+    if (!mounted) return;
+
+    late BuildContext dialogContext;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        dialogContext = ctx;
+        return AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              SizedBox(width: 16.w),
+              Text(
+                'Generating PDF...',
+                style: AppTypography.body2,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      await vm.downloadPdf(summary: summary);
+      if (mounted) {
+        // Close loading dialog using the dialog context
+        Navigator.pop(dialogContext);
+
+        // Small delay to ensure dialog closes before showing snackbar
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (mounted) {
+          NotificationSnack.showSuccess('PDF generated successfully');
+          // Clear quotation items and reset summary after successful PDF export
+          vm.clearQuotation();
+          ref.read(summaryProvider.notifier).reset();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(dialogContext); // Close loading dialog using dialog context
+        NotificationSnack.showError('Failed to generate PDF: ${e.toString()}');
+      }
+    }
   }
 
 }
