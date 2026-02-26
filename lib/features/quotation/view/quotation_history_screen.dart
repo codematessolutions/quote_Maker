@@ -20,17 +20,20 @@ class QuotationHistoryScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+          backgroundColor: AppColors.background,
         title: Text('Delete Proposal', style: AppTypography.h5),
         content: Text('Are you sure you want to delete this proposal?', style: AppTypography.body2),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child:Text('Cancel',style: AppTypography.body1,),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child:Text('Delete',style: AppTypography.body1.copyWith(
+              color: Colors.red,
+            ),),
           ),
         ],
       ),
@@ -82,8 +85,7 @@ class QuotationHistoryScreen extends ConsumerWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('quotations')
-            .where('isDeleted', isNotEqualTo: true)
-            .orderBy('isDeleted')
+            .where('isDeleted', isEqualTo: false)
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {

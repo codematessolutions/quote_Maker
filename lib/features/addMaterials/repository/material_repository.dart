@@ -49,9 +49,9 @@ class MaterialRepository {
   }
   Future<void> loopMaterial() async {
     try {
-      _materialsCollection.get().then((value){
+      _firestore.collection('quotations').get().then((value){
         for(var doc in value.docs){
-          _materialsCollection.doc(doc.id).set({'isDeleted': false}, SetOptions(merge: true));
+          _firestore.collection('quotations').doc(doc.id).set({'isDeleted': false}, SetOptions(merge: true));
         }
       });
     } catch (e) {

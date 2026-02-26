@@ -52,315 +52,322 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
     final summary = ref.watch(summaryProvider);
     final vm = ref.read(quotationViewModelProvider.notifier);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        vm.clearQuotation();
+        ref.read(summaryProvider.notifier).reset();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title:  Text(
+            'Payment Summary',
+            style: AppTypography.h5,
+          ),
+          centerTitle: false,
         ),
-        title:  Text(
-          'Payment Summary',
-          style: AppTypography.h5,
-        ),
-        centerTitle: false,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Form(
-            key: formKey,
-            child: Column(
-              children: [
-                // Customer details section
-                Container(
-                  margin: EdgeInsets.only(bottom: 16.h),
-                  padding: AppPadding.p14,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: AppRadius.r10,
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'CUSTOMER DETAILS',
-                        style: AppTypography.body1.copyWith(
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      TextFormField(
-                        controller: customerNameCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Customer Name',
-                          labelStyle: AppTypography.body2,
-                          border: OutlineInputBorder(
-                            borderRadius: AppRadius.r8,
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          isDense: true,
-                        ),
-                        onChanged: (value) {
-                          ref.read(summaryProvider.notifier).setCustomerName(value.trim());
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter customer name';
-                          }
-                          return null;
-                        },
-
-                      ),
-                      AppSpacing.h12,
-                      TextFormField(
-                        controller: customerPhoneCtrl,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          labelStyle: AppTypography.body2,
-                          border: OutlineInputBorder(
-                            borderRadius: AppRadius.r8,
-                          ),
-                          isDense: true,
-                        ),
-                        onChanged: (value) {
-                          ref.read(summaryProvider.notifier).setCustomerPhone(value.trim());
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter customer phone';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Amount Summary Section
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: AppRadius.r10,
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildAmountRow(
-                        'TOTAL AMOUNT',
-                        formatCurrency(summary.totalAmount),
-                        isHeader: true,
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      _buildAmountRow(
-                        'SUBSIDY',
-                        formatCurrency(summary.subsidy),
-                        subtitle: '(Subsidy cheque to be submitted at the time of registration)',
-                        isSubsidy: true,
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      _buildAmountRow(
-                        'PAYABLE AMOUNT AFTER SUBSIDY',
-                        formatCurrency(summary.payableAfterSubsidy),
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      _buildEditableRow(
-                        'NEW YEAR SPECIAL OFFER',
-                        specialOfferCtrl,
-                        onChanged: (value) {
-                          final offer = double.tryParse(value) ?? 0;
-                          ref.read(summaryProvider.notifier).setSpecialOffer(offer);
-                        },
-                        isSpecialOffer: true,
-                      ),
-
-                      _buildAmountRow(
-                        'FINAL PAYABLE AMOUNT',
-                        formatCurrency(summary.finalPayableAmount),
-                        isFinal: true,
-                      ),
-                    ],
-                  ),
-                ),
-
-                AppSpacing.h20,
-
-                // Payment Schedule Section
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:AppRadius.r12,
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding:AppPadding.p12,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          'PAYMENT SCHEDULE',
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  // Customer details section
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16.h),
+                    padding: AppPadding.p14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: AppRadius.r10,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CUSTOMER DETAILS',
                           style: AppTypography.body1.copyWith(
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
                           ),
-                          textAlign: TextAlign.start,
+                        ),
+                        SizedBox(height: 12.h),
+                        TextFormField(
+                          controller: customerNameCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Customer Name',
+                            labelStyle: AppTypography.body2,
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadius.r8,
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            isDense: true,
+                          ),
+                          onChanged: (value) {
+                            ref.read(summaryProvider.notifier).setCustomerName(value.trim());
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter customer name';
+                            }
+                            return null;
+                          },
+
+                        ),
+                        AppSpacing.h12,
+                        TextFormField(
+                          controller: customerPhoneCtrl,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
+                          decoration: InputDecoration(
+                            labelText: 'Phone Number',
+                            labelStyle: AppTypography.body2,
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadius.r8,
+                            ),
+                            isDense: true,
+                          ),
+                          onChanged: (value) {
+                            ref.read(summaryProvider.notifier).setCustomerPhone(value.trim());
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter customer phone';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Amount Summary Section
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: AppRadius.r10,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildAmountRow(
+                          'TOTAL AMOUNT',
+                          formatCurrency(summary.totalAmount),
+                          isHeader: true,
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        _buildAmountRow(
+                          'SUBSIDY',
+                          formatCurrency(summary.subsidy),
+                          subtitle: '(Subsidy cheque to be submitted at the time of registration)',
+                          isSubsidy: true,
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        _buildAmountRow(
+                          'PAYABLE AMOUNT AFTER SUBSIDY',
+                          formatCurrency(summary.payableAfterSubsidy),
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        _buildEditableRow(
+                          'NEW YEAR SPECIAL OFFER',
+                          specialOfferCtrl,
+                          onChanged: (value) {
+                            final offer = double.tryParse(value) ?? 0;
+                            ref.read(summaryProvider.notifier).setSpecialOffer(offer);
+                          },
+                          isSpecialOffer: true,
+                        ),
+
+                        _buildAmountRow(
+                          'FINAL PAYABLE AMOUNT',
+                          formatCurrency(summary.finalPayableAmount),
+                          isFinal: true,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  AppSpacing.h20,
+
+                  // Payment Schedule Section
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:AppRadius.r12,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding:AppPadding.p12,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'PAYMENT SCHEDULE',
+                            style: AppTypography.body1.copyWith(
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        _buildPaymentScheduleRow(
+                          'ADVANCE',
+                          '(Payable on material delivery)',
+                          advanceCtrl,
+                          onChanged: (value) {
+                            final advance = double.tryParse(value) ?? 0;
+                            ref.read(summaryProvider.notifier).setAdvance(advance);
+                          },
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        _buildAmountRow(
+                          'AFTER INSTALLATION',
+                          formatCurrency(summary.afterInstallation),
+                          isInstallation: true,
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        Padding(
+                          padding: EdgeInsets.all(12.w),
+                          child: Text(
+                            'KSEB REGISTRATION FEES, KSEB SINGLE PHASE NET METER AND SRUCTUR WORK GI INCLUDED',
+                            style: AppTypography.caption.copyWith(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.grey69
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                 AppSpacing.h30,
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48.h,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: _hasSavedOnce
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary.withOpacity(0.3),
+                                width: 2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppDimens.buttonRadius),
+                              ),
+                            ),
+                            onPressed: _hasSavedOnce
+                                ? () {
+                                    final vm = ref.read(quotationViewModelProvider.notifier);
+                                    final summary = ref.read(summaryProvider);
+                                    _showExportOptions(context, vm, summary);
+                                  }
+                                : null,
+                            child: Text(
+                              'Export PDF',
+                              style: AppTypography.body1.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: _hasSavedOnce
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      _buildPaymentScheduleRow(
-                        'ADVANCE',
-                        '(Payable on material delivery)',
-                        advanceCtrl,
-                        onChanged: (value) {
-                          final advance = double.tryParse(value) ?? 0;
-                          ref.read(summaryProvider.notifier).setAdvance(advance);
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      _buildAmountRow(
-                        'AFTER INSTALLATION',
-                        formatCurrency(summary.afterInstallation),
-                        isInstallation: true,
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade300),
-                      Padding(
-                        padding: EdgeInsets.all(12.w),
-                        child: Text(
-                          'KSEB REGISTRATION FEES, KSEB SINGLE PHASE NET METER AND SRUCTUR WORK GI INCLUDED',
-                          style: AppTypography.caption.copyWith(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.grey69
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48.h,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
+                              ),
+                            ),
+                            onPressed: _isSaving || _hasSavedOnce
+                                ? null
+                                : () async {
+                                    if(formKey.currentState!.validate()){
+                                      setState(() {
+                                        _isSaving = true;
+                                      });
+                                      try {
+                                        // Save to Firestore but don't clear items yet
+                                        await vm.submitQuotation(
+                                          summary: summary,
+                                          clearAfter: false,
+                                        );
+                                        // Don't reset summary provider - keep data for PDF generation
+                                        NotificationSnack.showSuccess('Quotation saved successfully');
+                                        // // Navigate back to QuotationScreen
+                                        // if (mounted) {
+                                        //   Navigator.pop(context);
+                                        // }
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            _hasSavedOnce=true;
+                                            _isSaving = false;
+                                          });
+                                        }
+                                      }
+                                    }
+                                    else{
+                                      NotificationSnack.showError('Please fill all the fields');
+                                    }
+                                  },
+                            child: _isSaving
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : Text(
+                                    _hasSavedOnce ? 'Saved' : 'Save & Generate',
+                                    style: AppTypography.body1.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
                   ),
-                ),
-
-               AppSpacing.h30,
-
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 48.h,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: _hasSavedOnce
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary.withOpacity(0.3),
-                              width: 2,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimens.buttonRadius),
-                            ),
-                          ),
-                          onPressed: _hasSavedOnce
-                              ? () {
-                                  final vm = ref.read(quotationViewModelProvider.notifier);
-                                  final summary = ref.read(summaryProvider);
-                                  _showExportOptions(context, vm, summary);
-                                }
-                              : null,
-                          child: Text(
-                            'Export PDF',
-                            style: AppTypography.body1.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: _hasSavedOnce
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary.withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 48.h,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
-                            ),
-                          ),
-                          onPressed: _isSaving || _hasSavedOnce
-                              ? null
-                              : () async {
-                                  if(formKey.currentState!.validate()){
-                                    setState(() {
-                                      _isSaving = true;
-                                    });
-                                    try {
-                                      // Save to Firestore but don't clear items yet
-                                      await vm.submitQuotation(
-                                        summary: summary,
-                                        clearAfter: false,
-                                      );
-                                      // Don't reset summary provider - keep data for PDF generation
-                                      NotificationSnack.showSuccess('Quotation saved successfully');
-                                      // // Navigate back to QuotationScreen
-                                      // if (mounted) {
-                                      //   Navigator.pop(context);
-                                      // }
-                                    } finally {
-                                      if (mounted) {
-                                        setState(() {
-                                          _hasSavedOnce=true;
-                                          _isSaving = false;
-                                        });
-                                      }
-                                    }
-                                  }
-                                  else{
-                                    NotificationSnack.showError('Please fill all the fields');
-                                  }
-                                },
-                          child: _isSaving
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : Text(
-                                  _hasSavedOnce ? 'Saved' : 'Save & Generate',
-                                  style: AppTypography.body1.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                AppSpacing.h40,
-              ],
+                  AppSpacing.h40,
+                ],
+              ),
             ),
           ),
         ),
@@ -636,14 +643,10 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
       // Safely close dialog
       Navigator.of(context, rootNavigator: true).pop();
 
-      await Future.delayed(const Duration(milliseconds: 300));
-
       if (!mounted) return;
 
       NotificationSnack.showSuccess('PDF generated successfully');
 
-      vm.clearQuotation();
-      ref.read(summaryProvider.notifier).reset();
 
     } catch (e) {
       if (!mounted) return;
