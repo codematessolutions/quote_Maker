@@ -159,7 +159,7 @@ class PdfService {
                           _tableCell(e.brand),
                           _tableCell(e.warranty),
                           _tableCell(e.rating.toString()),
-                          _tableCell(e.qty.toString(), alignRight: true),
+                          _tableCell("${e.qty.toString()} (${e.unit})", alignRight: true),
                         ],
                       ),
                     ),

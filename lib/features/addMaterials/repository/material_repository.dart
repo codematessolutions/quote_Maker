@@ -47,10 +47,22 @@ class MaterialRepository {
       throw Exception('Failed to update material: $e');
     }
   }
+  Future<void> loopMaterial() async {
+    try {
+      _materialsCollection.get().then((value){
+        for(var doc in value.docs){
+          _materialsCollection.doc(doc.id).set({'isDeleted': false}, SetOptions(merge: true));
+        }
+      });
+    } catch (e) {
+      throw Exception('Failed to update material: $e');
+    }
+  }
 
   Future<void> deleteMaterial(String id) async {
     try {
-      await _materialsCollection.doc(id).delete();
+      // Soft delete: update isDeleted flag
+      await _materialsCollection.doc(id).set({'isDeleted': true}, SetOptions(merge: true));
     } catch (e) {
       throw Exception('Failed to delete material: $e');
     }
@@ -58,6 +70,7 @@ class MaterialRepository {
 
   Stream<List<MaterialModel>> getMaterials() {
     return _materialsCollection
+        .where('isDeleted', isEqualTo: false)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -67,4 +80,5 @@ class MaterialRepository {
           .toList();
     });
   }
+
 }

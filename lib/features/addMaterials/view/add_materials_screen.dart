@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quatation_making/core/utils/constants/app_assets.dart';
 import 'package:quatation_making/core/utils/constants/app_spacing.dart';
 import 'package:quatation_making/core/utils/constants/constants.dart';
 import 'package:quatation_making/core/utils/theme/app_colors.dart';
@@ -8,11 +8,7 @@ import 'package:quatation_making/core/utils/theme/app_padding.dart';
 import 'package:quatation_making/core/utils/theme/app_typography.dart';
 import 'package:quatation_making/features/addMaterials/application/material_state.dart';
 import 'package:quatation_making/widgets/custom_textField.dart';
-
-// lib/screens/add_material_screen.dart
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 class AddMaterialScreen extends ConsumerWidget {
   const AddMaterialScreen({super.key});
@@ -22,25 +18,52 @@ class AddMaterialScreen extends ConsumerWidget {
     final formKey = GlobalKey<FormState>();
     final addMaterialNotifier = ref.read(addMaterialProvider.notifier);
     final addMaterialState = ref.watch(addMaterialProvider);
+    final isEditing = addMaterialState.editingMaterialId != null;
 
-    // Only react when a save finishes (loading -> data or error),
-    // so adding/removing brand rows won't close the screen.
+    final List<String> unitList = [
+      // Length
+      "Meter",
+      "Feet",
+      "Km",
+      // Quantity
+      "Nos",
+      "Set",
+      "Pair",
+      "Box",
+      "Packet",
+      // Weight
+      "Kg",
+      "Gram",
+      "Ton",
+      // Electrical
+      "Watt",
+      "kW",
+      "kVA",
+      "Ampere",
+      "Volt",
+      "Ah",
+      // Area
+      "Sq.ft",
+      "Sq.m",
+      // Volume
+      "Litre",
+      "Bag",
+    ];
+
     ref.listen<AddMaterialState>(addMaterialProvider, (previous, state) {
       final prevStatus = previous?.status;
       final nextStatus = state.status;
 
-      // Success: only when we were loading before and now have data
       if (prevStatus is AsyncLoading && nextStatus is AsyncData) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Materials added successfully!'),
+          SnackBar(
+            content: Text(isEditing ? 'Materials updated successfully!' : 'Materials added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context);
       }
 
-      // Error: only when we transition into an error state
       if (nextStatus is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -57,7 +80,7 @@ class AddMaterialScreen extends ConsumerWidget {
         elevation: 0,
         backgroundColor: AppColors.card,
         title: Text(
-          'Add Material',
+          isEditing ? 'Edit Material' : 'Add Material',
           style: AppTypography.h5,
         ),
         centerTitle: false,
@@ -87,6 +110,44 @@ class AddMaterialScreen extends ConsumerWidget {
                         textInputAction: TextInputAction.next,
                       ),
                     ),
+                    Padding(
+                      padding: AppPadding.pxy2214,
+                      child: DropdownButtonFormField<String>(
+                        isDense: true,
+                        dropdownColor: AppColors.background,
+                        value: unitList.contains(addMaterialState.selectedUnit) 
+                            ? addMaterialState.selectedUnit 
+                            : unitList.first,
+                        decoration: InputDecoration(
+                          hintText: 'Select Unit',
+                          filled: true,
+                          fillColor: AppColors.greyF8,
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        ),
+                        items: unitList.map((String unit) {
+                          return DropdownMenuItem<String>(
+                            value: unit,
+                            child: Text(unit, style: AppTypography.body1),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            addMaterialNotifier.setUnit(newValue);
+                          }
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a unit';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
                     // Dynamic list of brand variants
                     ...List.generate(
                       addMaterialState.brandInputs.length,
@@ -109,11 +170,9 @@ class AddMaterialScreen extends ConsumerWidget {
                                   ),
                                   if (!isFirst)
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline,
-                                          color: Colors.redAccent),
+                                      icon: Image.asset(AppAssets.delete, color: Colors.red, width: 22.w),
                                       onPressed: () {
-                                        addMaterialNotifier
-                                            .removeBrandRow(index);
+                                        addMaterialNotifier.removeBrandRow(index);
                                       },
                                     ),
                                 ],
@@ -195,6 +254,7 @@ class AddMaterialScreen extends ConsumerWidget {
               ),
             ),
             SafeArea(
+              bottom: true,
               child: Padding(
                 padding: AppPadding.pxy2214,
                 child: Row(
@@ -215,9 +275,7 @@ class AddMaterialScreen extends ConsumerWidget {
                               ? null
                               : () {
                             if (formKey.currentState!.validate()) {
-                              ref
-                                  .read(addMaterialProvider.notifier)
-                                  .addMaterials();
+                              addMaterialNotifier.saveMaterials();
                             }
                           },
                           child: addMaterialState.status.isLoading
@@ -231,7 +289,7 @@ class AddMaterialScreen extends ConsumerWidget {
                             ),
                           )
                               : Text(
-                            'Submit',
+                            isEditing ? 'Update' : 'Submit',
                             style: AppTypography.body1.copyWith(
                               fontWeight: FontWeight.w600,
                               color: AppColors.card,
@@ -244,6 +302,7 @@ class AddMaterialScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            AppSpacing.h16,
           ],
         ),
       ),

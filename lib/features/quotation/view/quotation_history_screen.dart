@@ -16,6 +16,47 @@ import 'package:quatation_making/features/quotation/data/summary_model.dart';
 class QuotationHistoryScreen extends ConsumerWidget {
   const QuotationHistoryScreen({super.key});
 
+  Future<void> _deleteQuotation(BuildContext context, String docId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Proposal', style: AppTypography.h5),
+        content: Text('Are you sure you want to delete this proposal?', style: AppTypography.body2),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('quotations')
+            .doc(docId)
+            .update({'isDeleted': true});
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Proposal deleted successfully')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pdfService = PdfService();
@@ -30,9 +71,9 @@ class QuotationHistoryScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title:Text(
+        title: Text(
           'Previous Proposals',
-          style:AppTypography.h5.copyWith(
+          style: AppTypography.h5.copyWith(
             fontWeight: FontWeight.w600,
             color: AppColors.primary,
           ),
@@ -41,11 +82,16 @@ class QuotationHistoryScreen extends ConsumerWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('quotations')
+            .where('isDeleted', isNotEqualTo: true)
+            .orderBy('isDeleted')
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
@@ -89,6 +135,7 @@ class QuotationHistoryScreen extends ConsumerWidget {
               );
 
               return InkWell(
+                onLongPress: () => _deleteQuotation(context, doc.id),
                 onTap: () async {
                   await pdfService.generateQuotationPdf(items, total, summary: summary);
                 },
@@ -101,17 +148,13 @@ class QuotationHistoryScreen extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(AppAssets.documents,scale: 5.5,),
+                        Image.asset(AppAssets.documents, scale: 5.5,),
                         AppSpacing.w4,
                         // Left: main info
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Text(
-                              //   'Quotation #${docs.length - index}',
-                              //   style: AppTypography.body1.copyWith(fontWeight: FontWeight.w600),
-                              // ),
                               if (summary.customerName.isNotEmpty)
                                 Text(
                                     summary.customerName,
@@ -131,14 +174,29 @@ class QuotationHistoryScreen extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(total),
-                              style: AppTypography.h5,
+                            Row(
+                              children: [
+                                Text(
+                                  NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(total),
+                                  style: AppTypography.h5,
+                                ),
+                                AppSpacing.w8,
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: Image.asset(
+                                    AppAssets.delete,
+                                    color: Colors.red,
+                                    width: 18.w,
+                                  ),
+                                  onPressed: () => _deleteQuotation(context, doc.id),
+                                ),
+                              ],
                             ),
                             AppSpacing.h4,
                             if (createdAt != null)
                               Text(dateFormat.format(createdAt), style:
-                              AppTypography.caption.copyWith(color: AppColors.textSecondary,fontSize: 11.sp)),
+                              AppTypography.caption.copyWith(color: AppColors.textSecondary, fontSize: 11.sp)),
                           ],
                         ),
                       ],
@@ -153,4 +211,3 @@ class QuotationHistoryScreen extends ConsumerWidget {
     );
   }
 }
-

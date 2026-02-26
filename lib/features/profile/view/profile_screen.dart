@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -8,6 +9,7 @@ import 'package:quatation_making/core/utils/theme/app_colors.dart';
 import 'package:quatation_making/core/utils/theme/app_padding.dart';
 import 'package:quatation_making/core/utils/theme/app_radius.dart';
 import 'package:quatation_making/core/utils/theme/app_typography.dart';
+import 'package:quatation_making/features/addMaterials/application/material_state.dart';
 import 'package:quatation_making/features/addMaterials/view/add_materials_screen.dart';
 import 'package:quatation_making/features/profile/view/widgets/bank_details_row.dart';
 import 'package:quatation_making/features/quotation/view/quotation_history_screen.dart';
@@ -23,11 +25,11 @@ Future<void> _openUrl(String url) async {
   }
 }
 
-class BaymentProfileHeader extends StatelessWidget {
+class BaymentProfileHeader extends ConsumerWidget {
   const BaymentProfileHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -180,7 +182,7 @@ class BaymentProfileHeader extends StatelessWidget {
               CustomButton(
                 label: 'Previous Proposals',
                 onTap: () {
-                  NavigationService.pop(context);
+                  // NavigationService.pop(context);
                   NavigationService.push(
                     context,
                     const QuotationHistoryScreen(),
@@ -191,7 +193,8 @@ class BaymentProfileHeader extends StatelessWidget {
               CustomButton(
                 label:'Add Materials' ,
                 onTap: () {
-                  NavigationService.pop(context);
+                  // NavigationService.pop(context);
+                  ref.read(addMaterialProvider.notifier).clearForNewEntry();
                   NavigationService.push(context, AddMaterialScreen());
                 },
               ),

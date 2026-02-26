@@ -567,7 +567,7 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      builder: (context2) => Container(
         padding: EdgeInsets.all(16.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -602,20 +602,17 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
   }
 
   Future<void> _exportPdfWithLoading(
-    BuildContext context,
-    QuotationViewModel vm,
-    PaymentSummary summary,
-  ) async {
-    // Show loading dialog
+      BuildContext context,
+      QuotationViewModel vm,
+      PaymentSummary summary,
+      ) async {
     if (!mounted) return;
 
-    late BuildContext dialogContext;
-
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) {
-        dialogContext = ctx;
+      builder: (_) {
         return AlertDialog(
           content: Row(
             children: [
@@ -633,26 +630,29 @@ class _SummaryDetailsScreenState extends ConsumerState<SummaryDetailsScreen> {
 
     try {
       await vm.downloadPdf(summary: summary);
-      if (mounted) {
-        // Close loading dialog using the dialog context
-        Navigator.pop(dialogContext);
 
-        // Small delay to ensure dialog closes before showing snackbar
-        await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
 
-        if (mounted) {
-          NotificationSnack.showSuccess('PDF generated successfully');
-          // Clear quotation items and reset summary after successful PDF export
-          vm.clearQuotation();
-          ref.read(summaryProvider.notifier).reset();
-        }
-      }
+      // Safely close dialog
+      Navigator.of(context, rootNavigator: true).pop();
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      if (!mounted) return;
+
+      NotificationSnack.showSuccess('PDF generated successfully');
+
+      vm.clearQuotation();
+      ref.read(summaryProvider.notifier).reset();
+
     } catch (e) {
-      if (mounted) {
-        Navigator.pop(dialogContext); // Close loading dialog using dialog context
-        NotificationSnack.showError('Failed to generate PDF: ${e.toString()}');
-      }
+      if (!mounted) return;
+
+      Navigator.of(context, rootNavigator: true).pop();
+
+      NotificationSnack.showError(
+        'Failed to generate PDF: ${e.toString()}',
+      );
     }
   }
-
 }

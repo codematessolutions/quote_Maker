@@ -1,5 +1,6 @@
 class QuotationItem {
   final String material;
+  final String unit;
   final String brand;
   final String warranty;
   final String rating;
@@ -9,6 +10,7 @@ class QuotationItem {
 
   const QuotationItem({
     required this.material,
+    required this.unit,
     required this.brand,
     required this.warranty,
     required this.rating,
@@ -21,6 +23,7 @@ class QuotationItem {
 
   QuotationItem copyWith({
     String? material,
+    String? unit,
     String? brand,
     String? warranty,
     String? rating,
@@ -30,6 +33,7 @@ class QuotationItem {
   }) {
     return QuotationItem(
       material: material ?? this.material,
+      unit: unit ?? this.unit,
       brand: brand ?? this.brand,
       warranty: warranty ?? this.warranty,
       rating: rating ?? this.rating,
@@ -41,6 +45,7 @@ class QuotationItem {
 
   Map<String, dynamic> toJson() => {
     'material': material,
+    'unit': unit,
     'brand': brand,
     'warranty': warranty,
     'rating': rating,
@@ -53,6 +58,7 @@ class QuotationItem {
   factory QuotationItem.fromJson(Map<String, dynamic> json) {
     return QuotationItem(
       material: json['material'] as String? ?? '',
+      unit: json['unit'] as String? ?? '',
       brand: json['brand'] as String? ?? '',
       warranty: json['warranty'] as String? ?? '',
       rating: json['rating'] as String? ?? '',

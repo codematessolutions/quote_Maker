@@ -85,9 +85,10 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
     ref.read(quotationViewModelProvider.notifier).addItem(
       QuotationItem(
         material: materialCtrl.text.trim(),
+        unit: selectedMaterial?.unit??"",
         brand: brandCtrl.text.trim(),
         qty: qty,
-        price: selectedMaterial!.price,
+        price: selectedMaterial?.price??0,
         warranty: warrantyCtrl.text.trim(),
         rating: ratingCtrl.text.trim(),
         watt: 0,
@@ -334,37 +335,6 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
         Expanded(
           child: SizedBox(
             height: 48.h,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.card,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: AppColors.grey63, width: 0.6),
-                  borderRadius:
-                  BorderRadius.circular(AppDimens.buttonRadius),
-                ),
-              ),
-              onPressed: _addItem,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add, color: AppColors.grey63),
-                  Text(
-                    'Add',
-                    style: AppTypography.body1.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.grey63,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        AppSpacing.w12,
-        Expanded(
-          child: SizedBox(
-            height: 48.h,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppDimens.buttonRadius),
@@ -408,6 +378,37 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+        AppSpacing.w12,
+        Expanded(
+          child: SizedBox(
+            height: 48.h,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.card,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColors.grey63, width: 0.6),
+                  borderRadius:
+                  BorderRadius.circular(AppDimens.buttonRadius),
+                ),
+              ),
+              onPressed: _addItem,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, color: AppColors.grey63),
+                  Text(
+                    'Add',
+                    style: AppTypography.body1.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.grey63,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
