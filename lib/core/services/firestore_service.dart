@@ -22,6 +22,7 @@ class FirestoreService {
     try {
       final data = <String, dynamic>{
         'createdAt': Timestamp.now(),
+        'isDeleted': false,
         'total': total,
         'items': items.map((e) => e.toJson()).toList(),
         if (summary != null)
