@@ -26,6 +26,7 @@ class AddMaterialScreen extends ConsumerWidget {
       "Feet",
       "Km",
       // Quantity
+      "Pcs",
       "Nos",
       "Set",
       "Pair",
